@@ -1,0 +1,113 @@
+<!-- Estado: Cargando -->
+@if (cargando) {
+  <div class="flex items-center justify-center min-h-[400px]">
+    <span class="text-[#595c5d] font-body">Confirmando tu pago...</span>
+  </div>
+} @else if (errorPago) {
+  <!-- Estado: Pago Rechazado -->
+  <div class="flex flex-col items-center justify-center min-h-[400px] gap-3">
+    <span class="material-symbols-outlined text-red-500 text-[48px]">cancel</span>
+    <h2 class="font-headline font-black text-2xl text-[#2c2f30]">Pago Rechazado</h2>
+    <p class="text-[#595c5d]">Tu banco no autorizó el pago. Intenta con otra tarjeta.</p>
+    <button (click)="volverInicio()"
+      class="px-6 py-2.5 bg-[#dadddf] text-[#2c2f30] font-headline font-bold text-sm rounded-lg">
+      Volver al Inicio
+    </button>
+  </div>
+} @else {
+  <!-- Estado: Éxito -->
+  <div class="pt-2 pb-1">
+    <div class="pt-2 pb-1 transition-all items-center justify-center flex min-h-[400px]">
+
+      <div class="w-full max-w-2xl">
+
+        <div class="text-center mb-4">
+          <div class="inline-flex items-center justify-center w-14 h-14 mb-3 rounded-full bg-[#006b0a]/10 relative">
+            <div class="absolute inset-0 rounded-full border-2 border-[#006b0a]/20 animate-ping opacity-25"></div>
+            <span class="material-symbols-outlined text-[#006b0a] text-[36px]"
+              style="font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 36;">
+              check_circle
+            </span>
+          </div>
+          <h1 class="font-headline font-black italic tracking-tighter text-4xl text-[#2c2f30] mb-1">
+            ¡Reserva Confirmada!
+          </h1>
+          <p class="text-[#595c5d] text-md max-w-sm mx-auto font-body">
+            Tu cancha está lista. Hemos enviado los detalles de acceso y el código QR a tu correo electrónico.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+
+          <div class="bg-white p-4 rounded-xl md:col-span-2 flex flex-row items-center gap-4 shadow-sm">
+            <div class="w-24 h-16 rounded-lg overflow-hidden flex-shrink-0">
+              <img [appCachedImg]="booking.imageUrl" alt="Cancha" class="w-full h-full object-cover" />
+            </div>
+            <div class="flex-grow text-left">
+              <span
+                class="inline-block py-0.5 px-2 bg-[#59ee50] text-[#003e03] font-headline font-bold text-[10px] rounded-full mb-1 tracking-widest uppercase">
+                {{ booking.courtType }}
+              </span>
+              <h2 class="font-headline text-base font-bold text-[#2c2f30] leading-tight">
+                {{ booking.courtName }}
+              </h2>
+              <div class="mt-2 flex flex-wrap gap-4">
+                <div class="flex flex-col">
+                  <span class="text-[#757778] text-[10px] font-body font-bold uppercase tracking-widest">Fecha</span>
+                  <span class="text-[#2c2f30] font-semibold font-body text-xs">{{ booking.fecha }}</span>
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-[#757778] text-[10px] font-body font-bold uppercase tracking-widest">Horario</span>
+                  <span class="text-[#2c2f30] font-semibold font-body text-xs">{{ booking.schedule }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-[#eff1f2] p-3 rounded-xl md:col-span-2 flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-[#e6e8ea] flex items-center justify-center text-[#595c5d] flex-shrink-0">
+              <span class="material-symbols-outlined text-[18px]"
+                style="font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;">
+                payments
+              </span>
+            </div>
+            <div>
+              <span class="block text-[#757778] text-[10px] font-body font-bold uppercase tracking-widest">Total
+                Pagado</span>
+              <span class="text-[#2c2f30] font-headline font-bold text-sm">{{ booking.totalPaid }}</span>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <button (click)="verReserva()"
+            class="px-6 py-2.5 bg-gradient-to-r from-[#006b0a] to-[#59ee50] text-[#003e03] font-headline font-extrabold text-sm rounded-lg flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all shadow-md shadow-[#006b0a]/20 cursor-pointer">
+            <span class="material-symbols-outlined text-[18px]"
+              style="font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;">
+              analytics
+            </span>
+            Volver al Panel
+          </button>
+
+          <button (click)="volverInicio()"
+            class="px-6 py-2.5 bg-[#dadddf] text-[#2c2f30] font-headline font-bold text-sm rounded-lg flex items-center justify-center gap-2 hover:bg-[#e0e3e4] active:scale-95 transition-all cursor-pointer">
+            <span class="material-symbols-outlined text-[18px]"
+              style="font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;">
+              home
+            </span>
+            Volver al Inicio
+          </button>
+        </div>
+
+        <p class="text-center mt-4 text-[#757778] text-xs font-body">
+          ¿Necesitas ayuda con tu reserva?
+          <a (click)="contactarSoporte()" class="text-[#006b0a] font-bold hover:underline cursor-pointer">
+            Contactar Soporte
+          </a>
+        </p>
+
+      </div>
+    </div>
+  </div>
+}

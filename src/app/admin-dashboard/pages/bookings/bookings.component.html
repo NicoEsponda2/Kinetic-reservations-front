@@ -1,0 +1,83 @@
+<div class="space-y-5">
+  
+  <app-table 
+    [columns]="tableColumns" 
+    [data]="paginatedReservas" 
+    [customTemplates]="{ 
+      'idCodigo': idTpl, 
+      'fechaHora': fechaTpl, 
+      'instalacion': instalacionTpl, 
+      'usuario': usuarioTpl, 
+      'monto': montoTpl, 
+      'estado': estadoTpl, 
+      'acciones': accionesTpl 
+    }"
+    [totalItems]="totalReservas" 
+    [currentPage]="currentPage" 
+    [pageSize]="pageSize" 
+    [loading]="cargando"
+    [showExport]="true"
+    [showAddAction]="false" 
+    [showFilterBar]="false"
+    (onExport)="exportarDatos()"
+    (onPageChange)="handlePageChange($event)">
+
+    <div table-header>
+      <h1 class="title-text">{{titulo}}</h1>
+      <p class="subtitle-text">Gestiona y supervisa todas las actividades del estadio con control total.</p>
+    </div>
+
+  </app-table>
+
+  <ng-template #idTpl let-item>
+    <span class="font-bold text-[#006b0a] text-xs">{{ item.idCodigo }}</span>
+  </ng-template>
+
+  <ng-template #fechaTpl let-item>
+    <p class="font-bold text-slate-900 text-xs m-0">{{ item.fecha | date:'dd MMM yyyy' }}</p>
+    <p class="text-[10px] text-slate-500 font-medium m-0">{{ item.hora | slice:0:5 }} hrs</p>
+  </ng-template>
+
+  <ng-template #instalacionTpl let-item>
+    <div class="flex items-center gap-2">
+      <div class="w-1.5 h-6 rounded-full" [ngClass]="item.colorCancha"></div>
+      <div>
+        <p class="font-bold text-slate-900 text-xs m-0">{{ item.canchaNombre }}</p>
+        <p class="text-[10px] text-slate-500 m-0">{{ item.canchaTipo }}</p>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #usuarioTpl let-item>
+    <div class="flex items-center gap-2">
+      <img [src]="item.usuarioAvatar" [alt]="item.usuarioNombre" class="w-7 h-7 rounded-full object-cover border border-slate-200 bg-slate-100">
+      <p class="font-medium text-slate-900 text-xs m-0">{{ item.usuarioNombre }}</p>
+    </div>
+  </ng-template>
+
+  <ng-template #montoTpl let-item>
+    <p class="font-black text-slate-900 text-xs m-0">${{ item.precio_cobrado | number:'1.0-0' }}</p>
+  </ng-template>
+
+  <ng-template #estadoTpl let-item>
+    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase" [ngClass]="item.estadoClass">
+      <span class="w-1 h-1 rounded-full" [ngClass]="item.estadoDotClass"></span>
+      {{ item.estado }}
+    </span>
+  </ng-template>
+
+  <ng-template #accionesTpl let-item>
+    <div class="flex justify-end gap-1.5">
+      <button class="p-1.5 text-slate-400 hover:text-[#006b0a] transition-colors hover:bg-slate-100 rounded-lg" title="Ver detalles">
+        <span class="material-symbols-outlined text-lg">visibility</span>
+      </button>
+      <button class="p-1.5 text-slate-400 hover:text-[#0058bb] transition-colors hover:bg-slate-100 rounded-lg" title="Editar">
+        <span class="material-symbols-outlined text-lg">edit</span>
+      </button>
+      <button class="p-1.5 text-slate-400 hover:text-red-600 transition-colors hover:bg-red-50 rounded-lg" title="Cancelar Reserva">
+        <span class="material-symbols-outlined text-lg">cancel</span>
+      </button>
+    </div>
+  </ng-template>
+
+</div>

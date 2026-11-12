@@ -1,0 +1,253 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/* Carruseles horizontales nativos sin barra de scroll visible */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Animación CSS acelerada por GPU para notificaciones Toastr (sin motor @angular/animations) */
+@keyframes kr-toast-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+.toast-container .ngx-toastr {
+  animation: kr-toast-enter 0.2s ease-out;
+}
+
+.border-l-kinetic-green {
+  border-color: #59ee50;
+}
+.bg-kinetic-green {
+  background: linear-gradient(135deg, #006b0a 0%, #59ee50 100%);
+  color: #003e03;
+}
+
+/* md:text-sm (Se aplica desde pantallas de 768px hacia arriba) */
+@media (min-width: 768px) {
+  .tu-clase-panel {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.25rem; /* 20px */
+  }
+}
+
+/* --- Contenedores Principales --- */
+.header-container {
+  @apply flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-surface-variant/30 pb-4;
+}
+.card-section {
+  @apply bg-surface-container-lowest rounded-xl p-5 md:p-6 shadow-sm border border-outline-variant/10;
+}
+
+/* --- Textos y Tipografías --- */
+.title-text {
+  @apply text-2xl md:text-3xl font-black tracking-tight font-headline text-on-surface;
+}
+.subtitle-text {
+  @apply text-on-surface-variant mt-1 font-body text-xs md:text-sm;
+}
+.section-title {
+  @apply font-bold font-headline tracking-tight text-on-surface;
+}
+
+/* --- Formularios --- */
+.form-label {
+  @apply block text-[10px] font-black uppercase tracking-wider text-outline mb-1.5 font-label;
+}
+.form-input {
+  @apply w-full bg-surface-container-low border-none focus:ring-2 focus:ring-primary-container rounded-lg py-2 px-3 font-bold text-sm text-on-surface;
+}
+.form-textarea {
+  @apply w-full bg-surface-container-low border-none focus:ring-2 focus:ring-primary-container rounded-lg py-2 px-3 font-medium text-on-surface-variant text-xs leading-relaxed;
+}
+.form-select {
+  @apply w-full bg-surface-container-low border-none focus:ring-2 focus:ring-primary-container rounded-lg py-2.5 px-3 font-bold text-sm text-on-surface cursor-pointer;
+}
+.error-text {
+  @apply text-error text-[10px] mt-1 block;
+}
+
+/* --- Badges --- */
+.status-badge {
+  @apply flex items-center gap-2 bg-surface-container-low px-3 py-1.5 rounded-lg shadow-sm;
+}
+.status-dot {
+  @apply w-2 h-2 rounded-full;
+}
+.badge-text {
+  @apply text-xs font-bold text-on-surface uppercase tracking-wider font-label;
+}
+.modal-badge {
+  @apply ml-auto text-xs font-bold text-primary bg-primary-container/20 px-2 py-0.5 rounded-md;
+}
+
+/* --- Horarios y Días --- */
+.day-row {
+  @apply bg-surface-container-low/50 rounded-2xl p-3 border-l-4 flex items-center gap-6 transition-colors;
+}
+.day-title {
+  @apply font-bold font-headline tracking-tight text-on-surface;
+}
+.time-block {
+  @apply flex items-center bg-surface-container-lowest rounded-xl px-4 py-3 shadow-sm;
+}
+.time-text {
+  @apply text-sm font-bold text-on-surface;
+}
+.time-text-empty {
+  @apply text-sm font-bold text-on-surface-variant;
+}
+
+/* --- Switch / Toggle --- */
+.toggle-track {
+  @apply w-11 h-6 rounded-full relative transition-colors duration-200;
+}
+.toggle-thumb {
+  @apply absolute top-0.5 left-[2px] bg-white rounded-full h-5 w-5 transition-transform duration-200;
+}
+.toggle-label {
+  @apply ml-2 text-[10px] font-black uppercase text-outline font-label;
+}
+
+/* --- Botones --- */
+.btn-icon-delete {
+  @apply p-2 text-outline-variant hover:text-error transition-colors;
+}
+.btn-icon-modified {
+  @apply p-2 text-outline-variant hover:text-primary-container transition-colors;
+}
+
+.btn-add-block {
+  @apply shrink-0 p-3 rounded-xl border border-dashed border-kinetic-green/30 transition-all;
+}
+.btn-text {
+  @apply px-4 py-2 rounded-lg text-on-surface-variant text-xs font-bold hover:bg-surface-container-high transition-all;
+}
+.btn-primary-small {
+  @apply px-4 py-2 rounded-lg bg-kinetic-green text-white text-xs font-bold hover:bg-kinetic-green/90 transition-all shadow-sm;
+}
+.btn-secondary {
+  @apply px-5 py-2.5 rounded-lg text-secondary text-xs font-bold hover:bg-surface-container-high transition-all active:scale-95;
+}
+.btn-tertiary {
+  @apply text-[10px] font-bold text-primary px-2.5 py-1 bg-primary-container/20 rounded-md hover:bg-primary-container/40 transition-colors uppercase tracking-wider font-label;
+}
+
+/* --- Radio Cards (Estado) --- */
+.radio-card {
+  @apply relative flex items-center p-3 rounded-lg cursor-pointer transition-all border-2;
+}
+.radio-title {
+  @apply font-bold text-xs;
+}
+.radio-desc {
+  @apply text-[10px] mt-0.5;
+}
+
+/* --- Dropzone / Modal --- */
+.gallery-dropzone {
+  @apply col-span-3 h-28 rounded-lg relative flex items-center justify-center bg-surface-container-low hover:bg-surface-container cursor-pointer transition-colors shadow-sm border border-dashed border-outline-variant;
+}
+.dropzone-text {
+  @apply text-[10px] font-bold uppercase tracking-wider font-label;
+}
+.modal-backdrop {
+  @apply absolute inset-0 bg-black/50 backdrop-blur-sm;
+}
+.modal-content {
+  @apply relative bg-surface-container-lowest rounded-2xl shadow-2xl p-6 w-full max-w-sm border border-outline-variant/20;
+}
+
+/* =========================================
+   TARJETAS KPI
+========================================= */
+.kpi-card {
+  @apply bg-surface-container-lowest p-4 rounded-xl relative overflow-hidden shadow-sm border border-outline-variant/10 transition-all duration-200;
+}
+.kpi-decoration {
+  @apply absolute top-0 right-0 w-20 h-20 -mr-6 -mt-6 rounded-full transition-transform duration-300 group-hover:scale-110;
+}
+.kpi-title {
+  @apply text-outline text-[10px] font-bold uppercase tracking-wider mb-0.5 relative z-10 font-label;
+}
+.kpi-value {
+  @apply text-2xl font-black relative z-10 text-on-surface;
+}
+.trend-badge {
+  @apply text-[10px] font-bold flex items-center;
+}
+
+/* =========================================
+   GRÁFICO Y SELECTORES
+========================================= */
+.chart-select {
+  @apply bg-surface-container-low border-none rounded-lg text-xs font-bold text-on-surface p-1.5 focus:ring-2 focus:ring-primary-container cursor-pointer transition-shadow outline-none;
+}
+.chart-axis-labels {
+  @apply flex justify-between mt-3 text-[9px] font-bold text-outline-variant uppercase tracking-widest px-1 font-label;
+}
+
+/* =========================================
+   TARJETA OSCURA
+========================================= */
+.dark-card {
+  @apply bg-inverse-surface p-5 rounded-xl relative shadow-lg border border-transparent;
+}
+.dark-list-item {
+  @apply flex items-center justify-between py-1.5 border-b border-surface-variant/10 last:border-0;
+}
+.status-badge-small {
+  @apply px-1.5 py-0.5 text-[9px] font-bold rounded uppercase tracking-wider font-label;
+}
+
+/* =========================================
+   TABLA
+========================================= */
+.table-header-container {
+  @apply px-5 py-3.5 flex justify-between items-center bg-surface border-b border-outline-variant/10;
+}
+.btn-link-primary {
+  @apply text-primary text-xs font-bold flex items-center gap-0.5 hover:underline hover:text-surface-tint transition-colors cursor-pointer;
+}
+.table-header-row {
+  @apply border-b border-outline-variant/20 text-[9px] font-black text-outline tracking-widest bg-surface-container-low/30 uppercase font-label;
+}
+.table-row {
+  @apply hover:bg-surface-container-low/50 transition-colors duration-150;
+}
+.table-cell {
+  @apply px-5 py-3;
+}
+.table-icon-wrapper {
+  @apply w-7 h-7 rounded bg-tertiary-container/20 flex items-center justify-center;
+}
+.payment-badge {
+  @apply px-2 py-0.5 text-[10px] font-bold rounded-full border uppercase tracking-wider font-label;
+}
+
+/* =========================================
+   BOTONES ADICIONALES
+========================================= */
+.kinetic-gradient-button {
+  @apply flex items-center gap-1 text-white bg-kinetic-green hover:bg-primary-fixed-dim px-4 py-2 rounded-lg font-bold text-sm transition-colors shadow-sm;
+}

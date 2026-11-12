@@ -1,0 +1,201 @@
+<footer class="kinetic-footer text-white border-t border-white/10">
+  <div class="h-1 w-full bg-gradient-to-r from-primary via-[#59ee50] to-primary/40"></div>
+
+  <div class="max-w-screen-2xl mx-auto px-6 sm:px-8 md:px-12 py-12 sm:py-16">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8">
+
+      <!-- Identidad del proyecto -->
+      <div class="lg:col-span-4 space-y-5">
+        <a href="#inicio" class="inline-flex items-center gap-3 group">
+          <span
+            class="bg-primary w-10 h-10 rounded-xl flex items-center justify-center text-white font-headline font-black text-base shadow-lg shadow-primary/30 group-hover:scale-105 transition-transform">
+            KR
+          </span>
+          <div class="flex flex-col">
+            <span class="font-headline font-black italic tracking-tight text-white text-xl leading-none uppercase">
+              [Nombre Recinto]
+            </span>
+            <span class="text-[11px] font-bold text-[#59ee50] tracking-[0.2em] uppercase mt-1">
+              Kinetic Reservations
+            </span>
+          </div>
+        </a>
+
+        <p class="text-slate-300/85 text-sm font-body leading-relaxed max-w-sm">
+          Plataforma web para la gestión y reserva de recintos deportivos. Consulta horarios disponibles en tiempo real,
+          confirma tu cancha al instante y administra tus partidos desde tu panel.
+        </p>
+
+        <div class="flex flex-wrap gap-2 pt-1">
+          <span
+            class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-200 bg-white/5 border border-white/10 px-3 py-1 rounded-full">
+            <span class="material-symbols-outlined text-[15px] text-[#59ee50]">event_available</span>
+            Horarios en vivo
+          </span>
+          <span
+            class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-200 bg-white/5 border border-white/10 px-3 py-1 rounded-full">
+            <span class="material-symbols-outlined text-[15px] text-[#59ee50]">verified_user</span>
+            Webpay Plus
+          </span>
+        </div>
+      </div>
+
+      <!-- Explorar -->
+      <div class="lg:col-span-2">
+        <h4 class="text-[#59ee50] font-black font-headline text-xs mb-5 uppercase tracking-[0.2em]">
+          Explorar
+        </h4>
+        <ul class="space-y-3.5">
+          <li>
+            <a class="footer-nav-link text-slate-300 hover:text-white transition-colors text-sm font-semibold font-body inline-block"
+              href="#inicio">
+              Inicio
+            </a>
+          </li>
+          <li>
+            <a class="footer-nav-link text-slate-300 hover:text-white transition-colors text-sm font-semibold font-body inline-block"
+              href="#deportes">
+              Deportes / Servicios
+            </a>
+          </li>
+          <li>
+            <a class="footer-nav-link text-slate-300 hover:text-white transition-colors text-sm font-semibold font-body inline-block"
+              href="#comentarios">
+              Comentarios
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Plataforma y Privacidad -->
+      <div class="lg:col-span-3">
+        <h4 class="text-[#59ee50] font-black font-headline text-xs mb-5 uppercase tracking-[0.2em]">
+          Plataforma
+        </h4>
+        <ul class="space-y-3.5">
+          @if (authService.authStatus() === 'authenticated') {
+            @if (authService.isAdmin()) {
+              <li>
+                <a class="footer-nav-link text-slate-300 hover:text-white transition-colors text-sm font-semibold font-body inline-block"
+                  routerLink="/admin/dashboard">
+                  Panel Administrador
+                </a>
+              </li>
+              <li>
+                <a class="footer-nav-link text-slate-300 hover:text-white transition-colors text-sm font-semibold font-body inline-block"
+                  routerLink="/admin/bookings">
+                  Gestión de Reservas
+                </a>
+              </li>
+            } @else {
+              <li>
+                <a class="footer-nav-link text-slate-300 hover:text-white transition-colors text-sm font-semibold font-body inline-block"
+                  routerLink="/panel-usuario/dashboard-usuario">
+                  Mi Panel
+                </a>
+              </li>
+              <li>
+                <a class="footer-nav-link text-slate-300 hover:text-white transition-colors text-sm font-semibold font-body inline-block"
+                  routerLink="/panel-usuario/reservas-usuario">
+                  Mis Reservas
+                </a>
+              </li>
+              <li>
+                <a class="footer-nav-link text-slate-300 hover:text-white transition-colors text-sm font-semibold font-body inline-block"
+                  routerLink="/panel-usuario/comentarios-usuario">
+                  Mis Comentarios
+                </a>
+              </li>
+            }
+          } @else {
+            <li>
+              <a class="footer-nav-link text-slate-300 hover:text-white transition-colors text-sm font-semibold font-body inline-block"
+                routerLink="/auth/login">
+                Iniciar Sesión
+              </a>
+            </li>
+            <li>
+              <a class="footer-nav-link text-slate-300 hover:text-white transition-colors text-sm font-semibold font-body inline-block"
+                routerLink="/auth/register">
+                Crear Cuenta
+              </a>
+            </li>
+          }
+          <li>
+            <button
+              type="button"
+              (click)="cookieService.openModal('policy')"
+              class="footer-nav-link text-slate-300 hover:text-white transition-colors text-sm font-semibold font-body text-left">
+              Política de Privacidad
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              (click)="cookieService.openModal('preferences')"
+              class="footer-nav-link text-slate-300 hover:text-white transition-colors text-sm font-semibold font-body text-left inline-flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-base text-[#59ee50]">cookie</span>
+              Configuración de Cookies
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Acceso directo a reservas -->
+      <div class="lg:col-span-3">
+        <div class="rounded-2xl bg-white/5 border border-white/10 p-5 sm:p-6 space-y-4">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-[#59ee50] animate-pulse"></span>
+            <span class="font-headline font-bold text-[11px] text-[#59ee50] uppercase tracking-[0.18em]">
+              Reserva en 3 pasos
+            </span>
+          </div>
+
+          <div class="space-y-1.5">
+            <h4 class="font-headline font-black text-base text-white leading-snug">
+              ¿Listo para tu próximo partido?
+            </h4>
+            <p class="text-slate-300/80 text-xs font-body leading-relaxed">
+              Elige tu deporte, selecciona la cancha y asegura tu horario con confirmación inmediata.
+            </p>
+          </div>
+
+          @if (authService.authStatus() === 'authenticated' && !authService.isAdmin()) {
+            <a routerLink="/panel-usuario/nueva-reserva"
+              class="w-full py-2.5 px-4 bg-primary hover:bg-[#28a428] text-white font-headline font-extrabold text-xs uppercase tracking-widest rounded-xl inline-flex items-center justify-center gap-2 shadow-lg shadow-primary/25 transition-all active:scale-95">
+              <span class="material-symbols-outlined text-[18px]">calendar_add_on</span>
+              Reservar Cancha
+            </a>
+          } @else if (authService.authStatus() === 'authenticated' && authService.isAdmin()) {
+            <a routerLink="/admin/new-booking"
+              class="w-full py-2.5 px-4 bg-primary hover:bg-[#28a428] text-white font-headline font-extrabold text-xs uppercase tracking-widest rounded-xl inline-flex items-center justify-center gap-2 shadow-lg shadow-primary/25 transition-all active:scale-95">
+              <span class="material-symbols-outlined text-[18px]">calendar_add_on</span>
+              Nueva Reserva
+            </a>
+          } @else {
+            <a routerLink="/auth/login"
+              class="w-full py-2.5 px-4 bg-primary hover:bg-[#28a428] text-white font-headline font-extrabold text-xs uppercase tracking-widest rounded-xl inline-flex items-center justify-center gap-2 shadow-lg shadow-primary/25 transition-all active:scale-95">
+              <span class="material-symbols-outlined text-[18px]">login</span>
+              Reservar Ahora
+            </a>
+          }
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Barra inferior -->
+  <div class="border-t border-white/10">
+    <div
+      class="max-w-screen-2xl mx-auto px-6 sm:px-8 md:px-12 py-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-center sm:text-left">
+      <p class="text-slate-400 text-[11px] tracking-[0.16em] font-bold font-label uppercase">
+        © {{ currentYear }} KINETIC RESERVATIONS · [NOMBRE RECINTO]. TODOS LOS DERECHOS RESERVADOS.
+      </p>
+      <p class="text-slate-400 text-[11px] font-medium font-body inline-flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-[15px] text-[#59ee50]">schedule</span>
+        Horarios en hora local Chile (America/Santiago)
+      </p>
+    </div>
+  </div>
+</footer>

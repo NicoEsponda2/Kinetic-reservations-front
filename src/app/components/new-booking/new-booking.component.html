@@ -1,0 +1,323 @@
+<main class="pt-2  transition-all">
+  <div class="max-w-5xl mx-auto">
+
+    <div class="mb-6 px-4">
+      <div class="flex items-center justify-between relative">
+        <div class="absolute top-4 left-0 w-full h-1 bg-surface-container-high z-0"></div>
+        <div class="absolute top-4 left-0 h-1 bg-primary z-0 transition-all duration-700"
+          [style.width.%]="getProgressPercentage()"></div>
+
+        <div class="relative z-10 flex flex-col items-center">
+          <div
+            class="w-8 h-8  text-sm rounded-full flex items-center justify-center font-bold  ring-4 ring-background transition-all"
+            [class.bg-primary]="currentStep >= 1" [class.text-on-primary]="currentStep >= 1"
+            [class.bg-surface-container-highest]="currentStep < 1" [class.text-on-surface-variant]="currentStep < 1">
+            1
+          </div>
+          <span class="mt-1.5 text-[10px] font-headline font-bold uppercase tracking-wider text-center transition-all"
+            [class.text-primary]="currentStep >= 1" [class.text-on-surface-variant]="currentStep < 1">Información</span>
+        </div>
+
+        <div class="relative z-10 flex flex-col items-center">
+          <div
+            class="w-8 h-8 text-sm rounded-full flex items-center justify-center font-bold ring-4 ring-background transition-all"
+            [class.bg-primary]="currentStep >= 2" [class.text-on-primary]="currentStep >= 2"
+            [class.bg-surface-container-highest]="currentStep < 2" [class.text-on-surface-variant]="currentStep < 2">
+            2
+          </div>
+          <span class="mt-1.5 text-[10px] font-headline font-medium uppercase tracking-wider text-center transition-all"
+            [class.text-primary]="currentStep >= 2" [class.text-on-surface-variant]="currentStep < 2">Horario</span>
+        </div>
+
+        <div class="relative z-10 flex flex-col items-center">
+          <div
+            class="w-8 h-8 text-sm rounded-full flex items-center justify-center font-bold ring-4 ring-background transition-all"
+            [class.bg-primary]="currentStep >= 3" [class.text-on-primary]="currentStep >= 3"
+            [class.bg-surface-container-highest]="currentStep < 3" [class.text-on-surface-variant]="currentStep < 3">
+            3
+          </div>
+          <span class="mt-1.5 text-[10px] font-headline font-medium uppercase tracking-wider text-center transition-all"
+            [class.text-primary]="currentStep >= 3" [class.text-on-surface-variant]="currentStep < 3">Pago</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-4">
+      <h2 class="text-2xl md:text-3xl font-headline font-black text-on-background tracking-tight leading-[1.1]">
+        Información Personal
+        <span class="text-[#006b0a]">y de Reserva</span>
+      </h2>
+      <div class="h-1 w-16 bg-[#32CD32] mt-2 rounded-full"></div>
+    </div>
+
+    <div
+      class="bg-surface-container-lowest rounded-xl p-5 md:p-6 shadow-sm border border-surface-container-high relative overflow-hidden">
+      <div class="absolute -right-20 -top-20 w-48 h-48 bg-primary opacity-[0.05] rounded-full pointer-events-none">
+      </div>
+
+      <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()" class="relative z-10">
+
+        @if (currentStep === 1) {
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
+          <div class="space-y-4">
+            <h3 class="font-headline font-bold text-base text-secondary flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary text-[20px]">person</span>
+              Tus Datos
+            </h3>
+            <div class="space-y-1.5">
+              <label
+                class="block text-[10px] font-label font-bold text-on-surface-variant uppercase tracking-widest">Nombre
+                Completo</label>
+              <input type="text" formControlName="fullName" placeholder="Ej. Carlos Alcaraz"
+                class="w-full bg-surface-container-low border-none rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-primary transition-all font-body text-on-surface"
+                [class.ring-2]="isFieldInvalid('fullName')" [class.ring-error]="isFieldInvalid('fullName')">
+              @if (isFieldInvalid('fullName')) {
+              <p class="text-[10px] text-error-container mt-0.5">El nombre es requerido (mínimo 3 caracteres)</p>
+              }
+            </div>
+            <div class="space-y-1.5">
+              <label
+                class="block text-[10px] font-label font-bold text-on-surface-variant uppercase tracking-widest">Correo
+                Electrónico</label>
+              <input type="email" formControlName="email" placeholder="carlos@kinetic.com"
+                class="w-full bg-surface-container-low border-none rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-primary transition-all font-body text-on-surface"
+                [class.ring-2]="isFieldInvalid('email')" [class.ring-error]="isFieldInvalid('email')">
+              @if (isFieldInvalid('email')) {
+              <p class="text-[10px] text-error-container mt-0.5">Ingresa un email válido</p>
+              }
+            </div>
+            <div class="space-y-1.5">
+              <label
+                class="block text-[10px] font-label font-bold text-on-surface-variant uppercase tracking-widest">
+                Teléfono
+              </label>
+
+              <input 
+                formControlName="phone" 
+                placeholder="+56 9 1234 5678"
+                (input)="enforcePhonePrefix($event)"
+                class="w-full bg-surface-container-low border-none rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-primary transition-all font-body text-on-surface"
+                [class.ring-2]="isFieldInvalid('phone')" 
+                [class.ring-error]="isFieldInvalid('phone')">
+              
+              @if (isFieldInvalid('phone')) {
+                <p class="text-[10px] text-error-container mt-0.5">
+                  Teléfono inválido. Debe comenzar con +569 y tener al menos 8 dígitos.
+                </p>
+              }
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <h3 class="font-headline font-bold text-base text-secondary flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary text-[20px]">sports_score</span>
+              Detalles del Juego
+            </h3>
+            <div class="space-y-1.5">
+              <label
+                class="block text-[10px] font-label font-bold text-on-surface-variant uppercase tracking-widest">Selección
+                de Deporte</label>
+              <div class="relative">
+                <select formControlName="sport"
+                  class="w-full appearance-none bg-surface-container-low border-none rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-primary transition-all font-body text-on-surface">
+                  <option value="" disabled>Seleccionar...</option>
+                  @for (sport of deportes; track sport.id_servicio) {
+                  <option [value]="sport.id_servicio">{{ sport.nombre }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+            <div class="space-y-1.5">
+              <label
+                class="block text-[10px] font-label font-bold text-on-surface-variant uppercase tracking-widest">Selección
+                de Cancha</label>
+              <div class="grid grid-cols-2 gap-3">
+                <div class="relative">
+                  <select formControlName="court" [attr.disabled]="!bookingForm.get('sport')?.value ? '' : null"
+                    class="w-full appearance-none bg-surface-container-low border-none rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-primary transition-all font-body text-on-surface disabled:opacity-50 disabled:cursor-not-allowed">
+                    <option value="" disabled>Seleccionar...</option>
+                    @for (court of courts; track court.id_pista) {
+                    <option [value]="court.id_pista">{{ court.nombre }}</option>
+                    }
+                  </select>
+                </div>
+                <input type="text" readonly
+                  [value]="selectedCourtPrice !== null ? ('$' + (selectedCourtPrice | number:'1.0-0') + ' /hr') : ''"
+                  placeholder="Precio /hr"
+                  class="w-full bg-surface-container-low border-none rounded-lg p-2.5 text-sm font-body text-on-surface cursor-not-allowed opacity-80">
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="space-y-1.5">
+                <label
+                  class="block text-[10px] font-label font-bold text-on-surface-variant uppercase tracking-widest">Fecha</label>
+                <div class="relative">
+                  <input type="date" formControlName="date" [min]="minDate"
+                    [attr.disabled]="!bookingForm.get('court')?.value ? '' : null"
+                    class="w-full bg-surface-container-low border-none rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-primary transition-all font-body text-on-surface disabled:opacity-50 disabled:cursor-not-allowed"
+                    [class.ring-2]="isFieldInvalid('date')" [class.ring-error]="isFieldInvalid('date')">
+                </div>
+                @if (isFieldInvalid('date')) {
+                <p class="text-[10px] text-error-container mt-0.5">Requerido</p>
+                }
+              </div>
+              <div class="space-y-1.5">
+                <label
+                  class="block text-[10px] font-label font-bold text-on-surface-variant uppercase tracking-widest">Horario</label>
+                <div class="relative">
+                  <select formControlName="timeSlot" [attr.disabled]="!bookingForm.get('date')?.value ? '' : null"
+                    class="w-full appearance-none bg-surface-container-low border-none rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-primary transition-all font-body text-on-surface disabled:opacity-50 disabled:cursor-not-allowed"
+                    [class.ring-2]="isFieldInvalid('timeSlot')" [class.ring-error]="isFieldInvalid('timeSlot')">
+                    <option value="" disabled selected>Elegir...</option>
+                    @for (slot of timeSlots; track slot.hora_inicio) {
+                    <option [value]="slot.hora_inicio + ' - ' + slot.hora_termino">{{ slot.hora_inicio | slice:0:5 }} -
+                      {{ slot.hora_termino | slice:0:5 }}</option>
+                    }
+                  </select>
+                </div>
+                @if (isFieldInvalid('timeSlot')) {
+                <p class="text-[10px] text-error-container mt-0.5">Requerido</p>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+        }
+
+        @if (currentStep === 2) {
+        <div class="flex flex-col items-center text-center space-y-3">
+          <div class="h-12 w-12 rounded-full bg-surface-container-low flex items-center justify-center text-primary">
+            <span class="material-symbols-outlined text-2xl" data-icon="calendar_month">calendar_month</span>
+          </div>
+
+          <div class="space-y-4 w-full max-w-2xl">
+            <h3 class="font-headline font-black text-xl text-[#1b3556] tracking-tight uppercase">Confirma tu Reserva
+            </h3>
+
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-3 text-base">
+
+              <div
+                class="bg-surface-container-low/50 border border-surface-container rounded-lg p-2.5 flex flex-col items-center justify-center">
+                <span
+                  class="text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-widest mb-0.5">Deporte</span>
+                <span class="text-primary font-black tracking-tight leading-none">{{ selectedSportName }}</span>
+              </div>
+
+              <div
+                class="bg-surface-container-low/50 border border-surface-container rounded-lg p-2.5 flex flex-col items-center justify-center text-center">
+                <span
+                  class="text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-widest mb-0.5">Cancha</span>
+                <span class="text-primary font-black tracking-tight leading-none text-sm">{{ selectedCourtName }}</span>
+              </div>
+
+              <div
+                class="bg-surface-container-low/50 border border-surface-container rounded-lg p-2.5 flex flex-col items-center justify-center">
+                <span
+                  class="text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-widest mb-0.5">Fecha</span>
+                <span class="text-primary font-black tracking-tight leading-none">{{ bookingForm.get('date')?.value
+                  }}</span>
+              </div>
+
+              <div
+                class="bg-surface-container-low/50 border border-surface-container rounded-lg p-2.5 flex flex-col items-center justify-center">
+                <span
+                  class="text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-widest mb-0.5">Horario</span>
+                <span class="text-primary font-black tracking-tight leading-none">{{ formattedTimeSlot }}</span>
+              </div>
+
+              <div
+                class="bg-surface-container-low/50 border border-surface-container rounded-lg p-2.5 flex flex-col items-center justify-center">
+                <span
+                  class="text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-widest mb-0.5">Precio</span>
+                <span class="text-[#006b0a] font-black tracking-tight leading-none">${{ selectedCourtPrice |
+                  number:'1.0-0' }}</span>
+              </div>
+
+            </div>
+          </div>
+
+          <div
+            class="w-full pt-5 border-t border-surface-container flex flex-col sm:flex-row items-center justify-between gap-4">
+            <button type="button" (click)="previousStep()"
+              class="flex items-center gap-2 text-primary font-headline font-bold text-sm hover:underline transition-all"
+              [disabled]="isProcessingPayment">
+              Volver atrás
+            </button>
+
+            <button type="button" (click)="iniciarPagoTransbank()" [disabled]="isProcessingPayment"
+              class="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3 bg-gradient-to-r from-primary to-primary-container text-on-primary-fixed font-headline font-black text-base rounded-xl shadow-md shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-tight disabled:opacity-70 disabled:cursor-wait">
+              @if (isProcessingPayment) {
+              <span class="material-symbols-outlined animate-spin" data-icon="sync">sync</span>
+              Procesando...
+              } @else {
+              Pagar
+              <span class="material-symbols-outlined text-[20px]" data-icon="arrow_forward">arrow_forward</span>
+              }
+            </button>
+          </div>
+        </div>
+        }
+
+        @if (currentStep == 1) {
+        <div class="mt-6 flex flex-col sm:flex-row items-center justify-between">
+          <div class="hidden sm:block">
+            <p class="text-xs text-on-surface-variant flex items-center gap-1.5 italic">
+              <span class="material-symbols-outlined text-[14px]">info</span>
+              Todos los campos son obligatorios.
+            </p>
+          </div>
+
+          <button type="button" (click)="nextStep()" [disabled]="bookingForm.invalid"
+            class="w-full sm:w-auto group flex items-center justify-center gap-2 bg-gradient-to-r from-[#006b0a] to-[#32CD32] text-white text-sm font-headline font-bold px-8 py-3 rounded-lg shadow-md shadow-primary/20 hover:translate-y-[-1px] hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+            Siguiente Paso
+            <span
+              class="material-symbols-outlined text-[18px] transition-transform group-hover:translate-x-1">arrow_forward</span>
+          </button>
+        </div>
+        }
+
+      </form>
+
+      @if (transbankData) {
+      <form #formTransbank [action]="transbankData.url" method="POST" class="hidden">
+        <input type="hidden" name="token_ws" [value]="transbankData.token">
+      </form>
+      }
+
+    </div>
+
+    <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div
+        class="bg-secondary-container/20 p-4 rounded-xl flex items-center gap-3 border border-secondary-container/10">
+        <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-secondary shadow-sm">
+          <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">speed</span>
+        </div>
+        <div>
+          <p class="text-[9px] font-label uppercase tracking-widest text-secondary font-bold">Registro Rápido</p>
+          <p class="text-[11px] font-medium text-on-secondary-container">Menos de 2 minutos</p>
+        </div>
+      </div>
+      <div class="bg-primary-container/20 p-4 rounded-xl flex items-center gap-3 border border-primary-container/10">
+        <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-primary shadow-sm">
+          <span class="material-symbols-outlined text-[20px]"
+            style="font-variation-settings: 'FILL' 1;">verified_user</span>
+        </div>
+        <div>
+          <p class="text-[9px] font-label uppercase tracking-widest text-primary-dim font-bold">Pago Seguro</p>
+          <p class="text-[11px] font-medium text-on-primary-container">Encriptación Bancaria</p>
+        </div>
+      </div>
+      <div
+        class="bg-surface-container-high/50 p-4 rounded-xl flex items-center gap-3 border border-surface-container-high">
+        <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-outline shadow-sm">
+          <span class="material-symbols-outlined text-[20px]"
+            style="font-variation-settings: 'FILL' 1;">support_agent</span>
+        </div>
+        <div>
+          <p class="text-[9px] font-label uppercase tracking-widest text-on-surface-variant font-bold">Soporte 24/7</p>
+          <p class="text-[11px] font-medium text-on-surface-variant">¿Dudas? Chatea ahora</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

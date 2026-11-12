@@ -1,0 +1,16 @@
+/* Clase para enlaces de navegación activos */
+.nav-link-active {
+  color: var(--color-primary, #22c55e);
+  border-bottom: 3px solid var(--color-primary, #22c55e);
+  padding-bottom: 0.35rem;
+}
+
+.nav-link {
+  color: var(--text-on-surface-variant, #5a6980);
+  font-weight: bold;
+  transition: all 0.15s ease-in-out;
+}
+
+.nav-link:hover {
+  color: var(--color-primary, #22c55e);
+}

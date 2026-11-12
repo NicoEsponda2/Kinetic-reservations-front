@@ -1,0 +1,52 @@
+<div class="bg-surface">
+  <div class="max-w-7xl mx-auto space-y-5">
+
+    <app-table [columns]="tableColumns" [data]="paginatedComments" [filters]="tableFilters"
+      [customTemplates]="{ 'usuario': usuarioTpl, 'comentario': comentarioTpl, 'estado': estadoTpl, 'acciones': accionesTpl }"
+      [totalItems]="totalComments" [currentPage]="currentPage" [pageSize]="pageSize" [loading]="cargando" [showExport]="true"
+      (onExport)="exportData()" (onFilterChange)="handleFilters($event)" (onClearFilters)="handleClearFilters()"
+      (onPageChange)="handlePageChange($event)">
+
+      <div table-header>
+        <h1 class="title-text">{{ titulo }}</h1>
+        <p class="subtitle-text">Gestión de comentarios ingresados por la comunidad.</p>
+      </div>
+
+    </app-table>
+
+    <ng-template #usuarioTpl let-item>
+      <div class="flex flex-col">
+        <p class="font-bold text-on-surface text-sm m-0">
+          {{ item.nombre }} {{ item.apellido }}
+        </p>
+        <p class="text-[10px] text-on-surface-variant m-0">
+          Comentario: {{ item.id_comentario }}
+        </p>
+      </div>
+    </ng-template>
+
+    <ng-template #comentarioTpl let-item>
+      <span class="text-xs text-on-surface-variant font-medium cursor-help" [title]="item.comentario">
+        {{ truncate(item.comentario) }}
+      </span>
+    </ng-template>
+
+    <ng-template #estadoTpl let-item>
+      <div class="flex items-center gap-1.5">
+        <div class="w-1.5 h-1.5 rounded-full" [ngClass]="getStatusColor(mapStatus(item.is_active))"></div>
+        <span class="text-xs font-semibold" [ngClass]="getStatusTextClass(mapStatus(item.is_active))">
+          {{ mapStatus(item.is_active) }}
+        </span>
+      </div>
+    </ng-template>
+
+    <ng-template #accionesTpl let-item>
+      <button (click)="toggleEstado(item)"
+        class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-primary-container rounded-lg transition-colors flex items-center justify-center"
+        title="Cambiar Estado">
+        <span class="material-symbols-outlined text-[16px]">sync</span>
+      </button>
+    </ng-template>
+
+  </div>
+</div>

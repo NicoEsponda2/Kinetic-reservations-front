@@ -1,0 +1,51 @@
+<div class="bg-surface">
+  <div class="max-w-7xl mx-auto space-y-5">
+
+    <app-table [columns]="tableColumns" [data]="paginatedServices" [filters]="tableFilters"
+      [customTemplates]="{ 'servicio': servicioTpl, 'descripcion': descripcionTpl, 'estado': estadoTpl, 'acciones': accionesTpl }"
+      [totalItems]="totalServices" [currentPage]="currentPage" [pageSize]="pageSize" [loading]="cargando" addActionLabel="Nuevo Servicio"
+      addActionIcon="add" (onExport)="exportData()" (onAdd)="addService()" (onFilterChange)="handleFilters($event)"
+      (onClearFilters)="handleClearFilters()" (onPageChange)="handlePageChange($event)"
+      (onRowAction)="handleRowAction($event)">
+
+      <div table-header>
+        <h1 class="title-text">{{ titulo }}</h1>
+        <p class="subtitle-text">Gestiona y supervisa todos los servicios del parque.</p>
+      </div>
+
+    </app-table>
+
+    <ng-template #servicioTpl let-servicio>
+      <div class="flex items-center gap-3">
+        <img [appCachedImg]="servicio.imagen_principal" [alt]="servicio.nombre"
+          class="w-9 h-9 rounded-lg object-cover bg-surface-container-low" />
+        <div>
+          <p class="font-bold text-on-surface text-sm m-0">{{ servicio.nombre }}</p>
+          <p class="text-[10px] text-on-surface-variant m-0">ID: {{ servicio.id_deporte.split('-')[0] }}</p>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #descripcionTpl let-servicio>
+      <span class="text-xs text-on-surface-variant">{{ truncate(servicio.descripcion) }}</span>
+    </ng-template>
+
+    <ng-template #estadoTpl let-servicio>
+      <div class="flex items-center gap-1.5">
+        <div class="w-1.5 h-1.5 rounded-full" [ngClass]="getStatusColor(mapStatus(servicio.is_active))"></div>
+        <span class="text-xs font-semibold" [ngClass]="getStatusTextClass(mapStatus(servicio.is_active))">
+          {{ mapStatus(servicio.is_active) }}
+        </span>
+      </div>
+    </ng-template>
+
+    <ng-template #accionesTpl let-servicio>
+      <button (click)="editService(servicio)"
+        class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-primary-container rounded-lg transition-colors"
+        title="Editar servicio">
+        <span class="material-symbols-outlined text-lg">edit</span>
+      </button>
+    </ng-template>
+
+  </div>
+</div>

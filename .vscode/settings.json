@@ -1,0 +1,26 @@
+{
+  "css.validate": false,
+  "scss.validate": false,
+  "workbench.colorCustomizations": {
+    "titleBar.activeBackground": "#4c0519",
+    "titleBar.activeForeground": "#fdfafb",
+    "titleBar.inactiveBackground": "#4c0519",
+    "titleBar.inactiveForeground": "#fdfafb",
+    "statusBar.background": "#881337",
+    "statusBar.foreground": "#ffffff",
+    "activityBar.background": "#1c1917",
+    "activityBar.foreground": "#a39494"
+  },
+  "angular-schematics.schematicsDefaultOptions": {
+    "angular-*": {
+      "externalTemplate": true,
+      "skipStyle": true
+    },
+    "angular-component": {
+      "skipChangeDetectionOnPush": true
+    },
+    "angular-page": {
+      "skipChangeDetectionOnPush": true
+    }
+  }
+}

@@ -1,0 +1,170 @@
+<div class="bg-surface">
+  <div class="max-w-7xl mx-auto space-y-6">
+
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <ng-content select="[table-header]"></ng-content>
+      </div>
+
+      <div class="flex items-center gap-3">
+        @if (showExport) {
+        <button (click)="onExport.emit()"
+          class="group flex items-center gap-2 bg-surface-container-lowest text-on-surface-variant font-bold px-4 py-2.5 rounded-xl shadow-sm border border-outline-variant/10 hover:border-outline-variant/30 hover:shadow-md transition-all duration-300 text-xs">
+          <span
+            class="material-symbols-outlined text-lg group-hover:-translate-y-0.5 transition-transform">download</span>
+          <span>Exportar</span>
+        </button>
+        }
+
+        @if (showAddAction) {
+        <button (click)="onAdd.emit()"
+          class="kinetic-gradient-button flex items-center gap-2 px-5 py-2.5 rounded-xl shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all duration-300 hover:-translate-y-0.5">
+          <span class="material-symbols-outlined text-lg">{{ addActionIcon }}</span>
+          <span class="font-bold text-xs">{{ addActionLabel }}</span>
+        </button>
+        }
+      </div>
+    </div>
+    @if (showFilterBar) {
+    <div class="bg-surface-container-lowest p-2 rounded-2xl shadow-sm border border-outline-variant/10 flex flex-col md:flex-row items-stretch md:items-center gap-2">
+
+      <div class="flex-1 flex items-center bg-surface-container-low/30 rounded-xl px-4 py-2 border border-transparent focus-within:border-primary/20 transition-colors">
+        <span class="material-symbols-outlined text-outline text-xl mr-3">filter_list</span>
+        <div class="flex-1 flex flex-col sm:flex-row gap-3 sm:gap-4">
+          @for (filter of filters; track filter.key; let last = $last) {
+          <select
+            class="custom-select bg-transparent border-none focus:ring-0 text-sm font-semibold text-on-surface-variant w-full cursor-pointer"
+            [(ngModel)]="filter.value" (change)="handleFilterChange()">
+            <option value="" class="text-outline">{{ filter.label }}</option>
+            @for (opt of filter.options; track opt.value) {
+            <option [value]="opt.value" class="text-on-surface">{{ opt.label }}</option>
+            }
+          </select>
+          @if (!last) {
+          <div class="hidden sm:block w-px h-5 bg-outline-variant/20 self-center"></div>
+          }
+          }
+        </div>
+      </div>
+
+      <div class="hidden lg:flex items-center bg-surface-container-low/30 rounded-xl px-4 py-2 gap-2 text-on-surface-variant">
+        <span class="material-symbols-outlined text-lg text-outline">calendar_today</span>
+        <span class="text-sm font-semibold">Últimos 30 días</span>
+      </div>
+
+      <button
+        class="flex items-center justify-center gap-2 px-4 py-2 md:py-0 bg-surface-container-low/50 text-on-surface-variant text-sm font-bold rounded-xl hover:bg-surface-container-low hover:text-on-surface transition-colors h-full min-h-[40px]"
+        (click)="clearFilters()">
+        <span class="material-symbols-outlined text-lg">restart_alt</span>
+        <span class="md:hidden lg:inline">Limpiar</span>
+      </button>
+
+    </div>
+    }
+
+    <div
+      class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 overflow-hidden flex flex-col">
+
+      <div class="overflow-x-auto custom-scrollbar">
+        <table class="w-full text-left border-collapse whitespace-nowrap min-w-[800px]">
+          <thead>
+            <tr class="bg-surface-container-low/30 border-b border-outline-variant/10">
+              @for (col of columns; track col.key) {
+              <th class="px-5 py-4 font-headline text-xs font-bold uppercase tracking-wider text-outline">
+                {{ col.label }}
+              </th>
+              }
+            </tr>
+          </thead>
+
+          <tbody class="divide-y divide-outline-variant/5">
+            @if (loading) {
+              @for (rowIdx of skeletonRows; track rowIdx) {
+              <tr class="animate-pulse">
+                @for (col of columns; track col.key; let colIdx = $index) {
+                <td class="px-5 py-4">
+                  @if (colIdx === 0) {
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-slate-200/80 shrink-0"></div>
+                    <div class="space-y-1.5">
+                      <div class="h-3.5 w-28 bg-slate-200 rounded"></div>
+                      <div class="h-2.5 w-16 bg-slate-100 rounded"></div>
+                    </div>
+                  </div>
+                  } @else if (colIdx === columns.length - 1) {
+                  <div class="h-7 w-7 rounded-lg bg-slate-200/80"></div>
+                  } @else {
+                  <div class="h-4 w-28 bg-slate-200/80 rounded-md"></div>
+                  }
+                </td>
+                }
+              </tr>
+              }
+            } @else {
+              @for (row of data; track $index) {
+              <tr class="group hover:bg-surface-container-low/40 transition-colors duration-200 cursor-default">
+                @for (col of columns; track col.key) {
+                <td
+                  class="px-5 py-3.5 text-sm font-medium text-on-surface-variant group-hover:text-on-surface transition-colors">
+                  @if (col.isCustom && customTemplates[col.key]) {
+                  <ng-container *ngTemplateOutlet="customTemplates[col.key]; context: { $implicit: row }"></ng-container>
+                  } @else {
+                  {{ row[col.key] }}
+                  }
+                </td>
+                }
+              </tr>
+              }
+            }
+          </tbody>
+        </table>
+
+        @if (!loading && data.length === 0) {
+        <div class="py-16 flex flex-col items-center justify-center text-outline">
+          <span class="material-symbols-outlined text-5xl mb-3 opacity-50">search_off</span>
+          <p class="font-headline font-bold text-lg">No se encontraron resultados</p>
+          <p class="text-sm mt-1">Intenta ajustando los filtros de búsqueda.</p>
+        </div>
+        }
+      </div>
+
+      <div
+        class="px-5 py-4 bg-surface-container-lowest border-t border-outline-variant/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+        @if (loading) {
+        <div class="h-4 w-52 bg-slate-200 rounded animate-pulse"></div>
+        } @else {
+        <p class="text-sm text-on-surface-variant font-medium">
+          Mostrando <span class="font-bold text-on-surface">{{ totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1 }}</span> a
+          <span class="font-bold text-on-surface">{{ Math.min(currentPage * pageSize, totalItems) }}</span>
+          de <span class="font-bold text-on-surface">{{ totalItems }}</span> resultados
+        </p>
+        }
+
+        <div class="flex items-center p-1 bg-surface-container-low/50 rounded-xl gap-1">
+          <button
+            class="w-8 h-8 flex items-center justify-center rounded-lg text-outline hover:text-on-surface hover:bg-white shadow-sm transition-all disabled:opacity-30 disabled:shadow-none disabled:hover:bg-transparent"
+            [disabled]="currentPage === 1" (click)="previousPage()">
+            <span class="material-symbols-outlined text-xl">chevron_left</span>
+          </button>
+
+          <div class="flex items-center px-1">
+            @for (page of pages; track page) {
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg text-sm font-bold transition-all"
+              [ngClass]="currentPage === page ? 'bg-primary text-on-primary shadow-md shadow-primary/20' : 'text-on-surface-variant hover:bg-white hover:text-on-surface hover:shadow-sm'"
+              (click)="goToPage(page)">
+              {{ page }}
+            </button>
+            }
+          </div>
+
+          <button
+            class="w-8 h-8 flex items-center justify-center rounded-lg text-outline hover:text-on-surface hover:bg-white shadow-sm transition-all disabled:opacity-30 disabled:shadow-none disabled:hover:bg-transparent"
+            [disabled]="currentPage >= totalPages" (click)="nextPage()">
+            <span class="material-symbols-outlined text-xl">chevron_right</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

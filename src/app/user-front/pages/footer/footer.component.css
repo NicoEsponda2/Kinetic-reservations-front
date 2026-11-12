@@ -1,0 +1,25 @@
+/* Fondo principal del footer acorde a la línea oscura de Inicio y Auth */
+.kinetic-footer {
+  background-color: #0f172a;
+  background-image: linear-gradient(180deg, #0f172a 0%, #080d17 100%);
+}
+
+/* Animación sutil de subrayado solo en enlaces de navegación */
+.footer-nav-link {
+  position: relative;
+}
+
+.footer-nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 0;
+  height: 1.5px;
+  background-color: #59ee50;
+  transition: width 0.25s ease;
+}
+
+.footer-nav-link:hover::after {
+  width: 100%;
+}

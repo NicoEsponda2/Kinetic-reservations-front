@@ -1,0 +1,373 @@
+<!-- =========================================================
+     BANNER INFERIOR NO INTRUSIVO (Sin Cookie Wall - Ley 21.719)
+     ========================================================= -->
+@if (cookieService.isBannerVisible()) {
+  <aside
+    aria-label="Aviso de privacidad y uso de cookies"
+    class="fixed bottom-0 inset-x-0 z-50 p-3 sm:p-5 pointer-events-none"
+  >
+    <div
+      class="pointer-events-auto max-w-6xl mx-auto rounded-2xl bg-[#0c0f10]/95 backdrop-blur-xl border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.6)] p-4 sm:p-6 text-white animate-in"
+    >
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+        <!-- Texto informativo transparente -->
+        <div class="flex items-start gap-3.5 max-w-3xl">
+          <div
+            class="hidden sm:flex w-11 h-11 shrink-0 rounded-xl bg-primary/20 border border-primary-container/30 items-center justify-center text-primary-container"
+          >
+            <span class="material-symbols-outlined text-2xl">cookie</span>
+          </div>
+
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="sm:hidden material-symbols-outlined text-primary-container text-lg">cookie</span>
+              <h2 class="font-headline font-extrabold text-sm sm:text-base tracking-tight text-white">
+                Tu privacidad y uso de cookies en Kinetic Reservations
+              </h2>
+              <span
+                class="hidden md:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-primary/25 text-primary-container border border-primary-container/25"
+              >
+                Ley N° 21.719 Chile
+              </span>
+            </div>
+
+            <p class="font-body text-xs sm:text-sm text-slate-300 leading-relaxed">
+              Utilizamos cookies estrictamente necesarias para gestionar tu sesión y tus reservas deportivas. Con tu
+              consentimiento previo y expreso, también podemos emplear cookies de preferencias, analítica y marketing.
+              Puedes aceptar todas, rechazar las opcionales o configurarlas libremente conforme a la
+              <button
+                type="button"
+                (click)="cookieService.openModal('policy')"
+                class="text-primary-container hover:underline font-bold inline-flex items-center gap-0.5 focus:outline-none"
+              >
+                Política de Privacidad y Cookies
+              </button>.
+            </p>
+          </div>
+        </div>
+
+        <!-- Botones con igual facilidad para aceptar o rechazar (Sin Dark Patterns) -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0">
+          <button
+            type="button"
+            (click)="cookieService.openModal('preferences')"
+            class="px-4 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider font-label text-slate-200 bg-white/5 hover:bg-white/10 border border-white/15 transition-all text-center"
+          >
+            Configurar
+          </button>
+
+          <button
+            type="button"
+            (click)="onRejectOptional(false)"
+            class="px-4 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider font-label text-white bg-slate-800 hover:bg-slate-700 border border-slate-600 transition-all text-center"
+          >
+            Solo necesarias
+          </button>
+
+          <button
+            type="button"
+            (click)="onAcceptAll(false)"
+            class="px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider font-label text-[#003e03] bg-primary-container hover:brightness-110 transition-all shadow-md text-center"
+          >
+            Aceptar todas
+          </button>
+        </div>
+      </div>
+    </div>
+  </aside>
+}
+
+<!-- =========================================================
+     MODAL DE CONFIGURACIÓN GRANULAR Y POLÍTICA LEGAL CHILENA
+     ========================================================= -->
+@if (cookieService.isModalOpen()) {
+  <div
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="cookie-modal-title"
+    class="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-4"
+  >
+    <!-- Backdrop -->
+    <div
+      (click)="cookieService.closeModal()"
+      class="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
+    ></div>
+
+    <!-- Contenedor Modal -->
+    <div
+      class="relative z-10 w-full max-w-2xl max-h-[90vh] flex flex-col rounded-2xl bg-surface-container-lowest border border-outline-variant/20 shadow-2xl overflow-hidden animate-in"
+    >
+      <!-- Cabecera oscura estilo Kinetic -->
+      <div class="bg-[#0c0f10] text-white px-5 sm:px-7 py-5 flex items-start justify-between gap-4 border-b border-white/10">
+        <div class="flex items-center gap-3">
+          <div
+            class="w-10 h-10 rounded-xl bg-primary/25 border border-primary-container/30 flex items-center justify-center text-primary-container shrink-0"
+          >
+            <span class="material-symbols-outlined text-xl">shield_lock</span>
+          </div>
+          <div>
+            <h3 id="cookie-modal-title" class="font-headline font-black text-base sm:text-lg tracking-tight">
+              Centro de Privacidad y Cookies
+            </h3>
+            <p class="text-[11px] sm:text-xs text-slate-400 font-body">
+              Cumplimiento Ley N° 21.719, Ley N° 19.628 y Ley del Consumidor (SERNAC)
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          (click)="cookieService.closeModal()"
+          aria-label="Cerrar ventana de preferencias"
+          class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/15 flex items-center justify-center text-slate-300 hover:text-white transition-colors shrink-0"
+        >
+          <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+      </div>
+
+      <!-- Pestañas (Tabs) -->
+      <div class="flex border-b border-outline-variant/20 bg-surface-container-low px-5 sm:px-7 pt-2 gap-2">
+        <button
+          type="button"
+          (click)="selectTab('preferences')"
+          [class]="
+            cookieService.activeTab() === 'preferences'
+              ? 'px-4 py-2.5 text-xs font-black uppercase tracking-wider border-b-2 border-primary text-primary bg-surface-container-lowest rounded-t-lg transition-all'
+              : 'px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-all'
+          "
+        >
+          Configurar Cookies
+        </button>
+        <button
+          type="button"
+          (click)="selectTab('policy')"
+          [class]="
+            cookieService.activeTab() === 'policy'
+              ? 'px-4 py-2.5 text-xs font-black uppercase tracking-wider border-b-2 border-primary text-primary bg-surface-container-lowest rounded-t-lg transition-all'
+              : 'px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-all'
+          "
+        >
+          Política y Derechos (Chile)
+        </button>
+      </div>
+
+      <!-- Cuerpo desplazable -->
+      <div class="p-5 sm:p-7 overflow-y-auto space-y-4 font-body text-on-surface">
+        @if (cookieService.activeTab() === 'preferences') {
+          <!-- Estado actual si ya había decidido antes -->
+          @if (cookieService.consentState(); as current) {
+            <div
+              class="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-primary-container/15 border border-primary/20 px-4 py-2.5 text-xs text-on-primary-container"
+            >
+              <span class="font-bold flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-base">verified</span>
+                Consentimiento registrado el {{ current.updatedAt | date: 'dd MMM yyyy, HH:mm' }}
+              </span>
+              <span class="text-[11px] font-semibold opacity-80">Puedes modificar o revocar tu permiso aquí</span>
+            </div>
+          } @else {
+            <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed">
+              Selecciona de forma libre y específica qué categorías opcionales deseas autorizar. Por defecto, todas las
+              cookies no esenciales están <strong>desactivadas</strong> hasta que otorgues tu consentimiento expreso.
+            </p>
+          }
+
+          <!-- 1. Estrictamente Necesarias -->
+          <div class="rounded-xl border border-outline-variant/25 bg-surface-container-low/50 p-4">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <h4 class="font-headline font-bold text-sm text-on-surface">
+                    1. Cookies Estrictamente Necesarias
+                  </h4>
+                  <span
+                    class="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-primary/15 text-primary"
+                  >
+                    Siempre activas
+                  </span>
+                </div>
+                <p class="text-xs text-on-surface-variant mt-1.5 leading-relaxed">
+                  Indispensables para el funcionamiento técnico del recinto digital: mantienen tu sesión segura
+                  (<code>token</code> JWT), permiten la autenticación con Google y guardan tu elección de privacidad
+                  (<code>kr_cookie_consent</code>). No requieren consentimiento previo según la Ley N° 21.719.
+                </p>
+              </div>
+              <div
+                aria-label="Siempre activas"
+                class="w-11 h-6 rounded-full bg-primary/50 flex items-center justify-end px-0.5 shrink-0 cursor-not-allowed opacity-80"
+              >
+                <span class="w-5 h-5 rounded-full bg-white shadow"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Preferencias y Funcionalidad -->
+          <div class="rounded-xl border border-outline-variant/25 bg-surface-container-lowest p-4 hover:border-primary/40 transition-colors">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h4 class="font-headline font-bold text-sm text-on-surface">
+                  2. Cookies de Preferencias y Funcionalidad
+                </h4>
+                <p class="text-xs text-on-surface-variant mt-1.5 leading-relaxed">
+                  Permiten recordar opciones de personalización como tu deporte o instalación favorita y preferencias
+                  visuales para agilizar futuras reservas.
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                [attr.aria-checked]="draftPreferences()"
+                (click)="toggleDraft('preferences')"
+                [class]="
+                  draftPreferences()
+                    ? 'w-11 h-6 rounded-full bg-primary flex items-center justify-end px-0.5 shrink-0 transition-colors'
+                    : 'w-11 h-6 rounded-full bg-outline-variant/50 flex items-center justify-start px-0.5 shrink-0 transition-colors'
+                "
+              >
+                <span class="w-5 h-5 rounded-full bg-white shadow transition-transform"></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 3. Analíticas y Rendimiento -->
+          <div class="rounded-xl border border-outline-variant/25 bg-surface-container-lowest p-4 hover:border-primary/40 transition-colors">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h4 class="font-headline font-bold text-sm text-on-surface">
+                  3. Cookies Analíticas y de Rendimiento
+                </h4>
+                <p class="text-xs text-on-surface-variant mt-1.5 leading-relaxed">
+                  Nos ayudan a medir de forma estadística horarios de alta demanda, tiempos de carga y navegación en el
+                  sitio para mejorar la experiencia de reserva de canchas.
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                [attr.aria-checked]="draftAnalytics()"
+                (click)="toggleDraft('analytics')"
+                [class]="
+                  draftAnalytics()
+                    ? 'w-11 h-6 rounded-full bg-primary flex items-center justify-end px-0.5 shrink-0 transition-colors'
+                    : 'w-11 h-6 rounded-full bg-outline-variant/50 flex items-center justify-start px-0.5 shrink-0 transition-colors'
+                "
+              >
+                <span class="w-5 h-5 rounded-full bg-white shadow transition-transform"></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 4. Marketing y Comunicaciones -->
+          <div class="rounded-xl border border-outline-variant/25 bg-surface-container-lowest p-4 hover:border-primary/40 transition-colors">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h4 class="font-headline font-bold text-sm text-on-surface">
+                  4. Cookies de Marketing y Publicidad
+                </h4>
+                <p class="text-xs text-on-surface-variant mt-1.5 leading-relaxed">
+                  Utilizadas únicamente con tu autorización para mostrarte torneos, convenios deportivos y promociones
+                  relevantes en plataformas asociadas.
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                [attr.aria-checked]="draftMarketing()"
+                (click)="toggleDraft('marketing')"
+                [class]="
+                  draftMarketing()
+                    ? 'w-11 h-6 rounded-full bg-primary flex items-center justify-end px-0.5 shrink-0 transition-colors'
+                    : 'w-11 h-6 rounded-full bg-outline-variant/50 flex items-center justify-start px-0.5 shrink-0 transition-colors'
+                "
+              >
+                <span class="w-5 h-5 rounded-full bg-white shadow transition-transform"></span>
+              </button>
+            </div>
+          </div>
+        } @else {
+          <!-- PESTAÑA DE POLÍTICA Y MARCO LEGAL CHILENO -->
+          <div class="space-y-4 text-xs sm:text-sm text-on-surface-variant leading-relaxed">
+            <div class="rounded-xl bg-surface-container-low p-4 border-l-4 border-primary">
+              <h4 class="font-headline font-bold text-on-surface text-sm mb-1">
+                Marco Normativo Aplicable en Chile
+              </h4>
+              <p class="text-xs">
+                El tratamiento de datos personales y el uso de cookies en <strong>Kinetic Reservations</strong> se rigen por
+                el <strong>Art. 19 N° 4 de la Constitución Política de la República</strong>, la
+                <strong>Ley N° 19.628 modernizada por la Ley N° 21.719 sobre Protección de Datos Personales</strong>, y
+                el <strong>Art. 15 bis de la Ley N° 19.496 sobre Protección de los Derechos de los Consumidores</strong>
+                junto al Reglamento de Comercio Electrónico fiscalizado por el <strong>SERNAC</strong>.
+              </p>
+            </div>
+
+            <div>
+              <h4 class="font-headline font-bold text-on-surface text-sm mb-1">
+                ¿Qué almacenamos y durante cuánto tiempo?
+              </h4>
+              <ul class="list-disc pl-5 space-y-1.5 text-xs">
+                <li>
+                  <strong>Sesión y Seguridad (Técnica):</strong> Token de autenticación (JWT) e integración OAuth 2.0
+                  con Google Identity Services para identificar tu cuenta al reservar pistas. Se elimina al cerrar
+                  sesión o expirar su vigencia.
+                </li>
+                <li>
+                  <strong>Registro de Consentimiento (<code>kr_cookie_consent</code>):</strong> Conserva tu decisión
+                  sobre cookies durante <strong>12 meses</strong>, tras lo cual volveremos a solicitar tu confirmación.
+                </li>
+                <li>
+                  <strong>Cookies Opcionales:</strong> Solo se activan si marcas explícitamente su casilla o presionas
+                  <em>"Aceptar todas"</em>. Si las desactivas, eliminamos automáticamente los identificadores asociados.
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 class="font-headline font-bold text-on-surface text-sm mb-1">
+                Tus Derechos como Titular de Datos (Derechos ARSOP+)
+              </h4>
+              <p class="text-xs">
+                En cualquier momento tienes derecho gratuito a solicitar el <strong>Acceso</strong>,
+                <strong>Rectificación</strong>, <strong>Supresión (Cancelación)</strong>, <strong>Oposición</strong> y
+                <strong>Portabilidad</strong> de tus datos personales, así como a <strong>revocar tu consentimiento</strong>
+                sin efecto retroactivo haciendo clic en <em>"Configuración de Cookies"</em> ubicado de forma permanente
+                en el pie de página del sitio.
+              </p>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Pie del Modal con acciones claras y simétricas -->
+      <div
+        class="bg-surface-container-low border-t border-outline-variant/20 px-5 sm:px-7 py-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5"
+      >
+        <button
+          type="button"
+          (click)="onRejectOptional(true)"
+          class="px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-on-surface bg-surface-container-lowest hover:bg-surface-container-high border border-outline-variant/40 transition-all text-center"
+        >
+          Solo necesarias
+        </button>
+
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+          <button
+            type="button"
+            (click)="onSaveCustom()"
+            class="px-4 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider text-primary bg-primary-container/25 hover:bg-primary-container/40 border border-primary/30 transition-all text-center"
+          >
+            Guardar selección
+          </button>
+
+          <button
+            type="button"
+            (click)="onAcceptAll(true)"
+            class="px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider text-white bg-primary hover:bg-primary-dim transition-all shadow-sm text-center"
+          >
+            Aceptar todas
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+

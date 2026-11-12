@@ -1,0 +1,68 @@
+<section class="relative overflow-hidden w-full min-h-screen flex items-center pt-24 pb-16 sm:pt-28 sm:pb-20" id="inicio">
+
+  <div class="absolute inset-0 z-0 w-full h-full bg-slate-950">
+    <img class="w-full h-full object-cover opacity-40 mix-blend-luminosity"
+      [src]="fondoHero" fetchpriority="high" loading="eager" decoding="async"
+      width="800" height="600" alt="Fondo" />
+    <div class="absolute bottom-0 w-full h-[30%] bg-gradient-to-t from-surface via-surface/20 to-transparent"></div>
+  </div>
+
+  <div class="relative z-10 max-w-screen-2xl mx-auto px-4 sm:px-6 md:px-10 w-full">
+
+    <div class="text-center mb-8 sm:mb-12 lg:mb-14">
+      <span
+        class="inline-block border border-[#32CD32]/40 bg-black/60 backdrop-blur-md text-[#32CD32] text-[10px] font-black tracking-[0.2em] px-4 py-1.5 rounded-full mb-3 sm:mb-4 font-label uppercase">
+        Proceso Simple
+      </span>
+      <h2
+        class="font-headline text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight tracking-tighter italic uppercase drop-shadow-lg px-2">
+        Tu Cancha en <span class="text-[#32CD32] drop-shadow-[0_0_15px_rgba(50,205,50,0.4)]">3 Pasos.</span>
+      </h2>
+    </div>
+
+    <div class="flex flex-col lg:flex-row gap-5 sm:gap-6 lg:gap-8 h-auto lg:h-[340px] w-full">
+
+      @for (paso of pasosReserva; track paso.numero) {
+
+      <div
+        class="group relative flex-1 min-h-[220px] sm:min-h-[250px] lg:min-h-0 lg:h-full lg:hover:flex-[1.8] rounded-[1.5rem] sm:rounded-[2rem] transition-all duration-700 ease-out cursor-pointer hover:shadow-[0_0_40px_rgba(50,205,50,0.6)]">
+
+        <div
+          class="absolute -top-2.5 -right-2 sm:-top-3 sm:-right-3 w-9 h-9 sm:w-10 sm:h-10 bg-slate-950 border-[3px] border-[#32CD32] rounded-full flex items-center justify-center text-white text-sm sm:text-base font-black z-30 shadow-[0_0_15px_rgba(50,205,50,0.5)] transition-all duration-500 group-hover:scale-110 group-hover:border-primary">
+          {{ paso.numero }}
+        </div>
+
+        <div
+          class="w-full h-full min-h-[220px] sm:min-h-[250px] lg:min-h-0 rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden relative border-[3px] border-[#32CD32]/80 bg-slate-900 z-10 transition-colors duration-500 group-hover:border-primary flex items-center justify-center">
+
+          <img [src]="paso.imagen"
+            fetchpriority="low" decoding="async" width="350" height="250"
+            class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-700"
+            [alt]="paso.titulo" />
+
+          <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/55 to-black/20"></div>
+
+          <div class="relative z-20 flex flex-col items-center justify-center h-full w-full p-5 sm:p-6 text-center">
+
+            <span
+              class="material-symbols-outlined text-4xl sm:text-5xl lg:text-6xl text-[#32CD32] mb-2.5 sm:mb-4 transition-all duration-500 group-hover:-translate-y-2 drop-shadow-[0_0_15px_rgba(50,205,50,0.8)] group-hover:text-primary group-hover:drop-shadow-[0_0_20px_rgba(50,205,50,1)]">
+              {{ paso.icono }}
+            </span>
+
+            <h3
+              class="text-xl sm:text-2xl lg:text-3xl font-black font-headline italic text-white uppercase mb-2 sm:mb-3 drop-shadow-md transition-colors group-hover:text-primary-light leading-tight">
+              {{ paso.titulo }}
+            </h3>
+
+            <p
+              class="text-xs sm:text-sm text-gray-200 font-medium max-w-[280px] leading-relaxed transition-opacity duration-500 opacity-90 group-hover:opacity-100 group-hover:text-white">
+              {{ paso.descripcion }}
+            </p>
+          </div>
+
+        </div>
+      </div> }
+
+    </div>
+  </div>
+</section>
