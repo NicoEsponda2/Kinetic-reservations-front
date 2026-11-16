@@ -9,6 +9,7 @@ import {
 import { AdminService, AdminUser } from '@dashboard/services/admin.service';
 import { AuthService } from '@auth/services/auth.service';
 import { ToastrService } from 'ngx-toastr';
+import { CloudinaryImagePipe } from '../../../pipes/cloudinary-image.pipe';
 
 type UserRole = string;
 
@@ -40,7 +41,13 @@ interface Stats {
 
 @Component({
   selector: 'app-users',
-  imports: [NgClass, DecimalPipe, FormsModule, TableComponent],
+  imports: [
+    NgClass,
+    DecimalPipe,
+    FormsModule,
+    TableComponent,
+    CloudinaryImagePipe,
+  ],
   templateUrl: './users.component.html',
 })
 export class UsersComponent implements OnInit {

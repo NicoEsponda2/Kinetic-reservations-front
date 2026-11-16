@@ -6,6 +6,7 @@ import {
 } from '../../../components/table/table.component';
 import { AdminService } from '../../services/admin.service';
 import { ToastrService } from 'ngx-toastr';
+import { CloudinaryImagePipe } from '../../../pipes/cloudinary-image.pipe';
 
 export interface ReservaList {
   id_reserva: number;
@@ -25,7 +26,14 @@ export interface ReservaList {
 
 @Component({
   selector: 'app-bookings',
-  imports: [NgClass, DatePipe, DecimalPipe, SlicePipe, TableComponent],
+  imports: [
+    NgClass,
+    DatePipe,
+    DecimalPipe,
+    SlicePipe,
+    TableComponent,
+    CloudinaryImagePipe,
+  ],
   templateUrl: './bookings.component.html',
 })
 export class BookingsComponent implements OnInit {

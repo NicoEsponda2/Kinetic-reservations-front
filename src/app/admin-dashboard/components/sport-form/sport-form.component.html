@@ -284,7 +284,7 @@
           @if (mainImagePreview(); as previewUrl) {
           <div
             class="relative group w-full h-44 rounded-xl overflow-hidden border border-gray-200 bg-gray-50 shadow-2xs">
-            <img [src]="previewUrl" alt="Imagen principal" class="w-full h-full object-cover" />
+            <img [src]="previewUrl | cloudinaryImage" alt="Imagen principal" class="w-full h-full object-cover" />
             <div
               class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
               <button type="button" (click)="mainInput.click()"
@@ -336,7 +336,7 @@
             @for (item of galleryItems(); track item.url; let i = $index) {
             <div
               class="relative group aspect-square rounded-xl overflow-hidden border border-gray-200 bg-gray-50 shadow-2xs">
-              <img [src]="item.url" alt="Foto galería {{ i + 1 }}" class="w-full h-full object-cover" />
+              <img [src]="item.url | cloudinaryImage" alt="Foto galería {{ i + 1 }}" class="w-full h-full object-cover" />
               @if (!item.isExisting) {
               <span
                 class="absolute top-1 left-1 bg-green-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-xs">Nueva</span>

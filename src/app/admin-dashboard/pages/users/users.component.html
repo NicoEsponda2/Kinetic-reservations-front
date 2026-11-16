@@ -18,7 +18,7 @@
     <ng-template #userTpl let-user>
       <div class="flex items-center gap-2.5">
         @if (user.avatar) {
-        <img [src]="user.avatar" [alt]="user.name" class="w-8 h-8 rounded-full object-cover" />
+        <img [src]="user.avatar | cloudinaryImage" [alt]="user.name" class="w-8 h-8 rounded-full object-cover" />
         } @else {
         <div
           class="w-8 h-8 rounded-full bg-tertiary-container flex items-center justify-center text-on-tertiary-container font-black text-xs">
@@ -103,7 +103,7 @@
           <div class="mt-2 flex items-center gap-2">
             <div class="flex -space-x-2">
               @for (user of stats.topUsers.slice(0, 3); track user.name) {
-              <img [src]="user.avatar" [alt]="user.name" [title]="user.name"
+              <img [src]="user.avatar | cloudinaryImage" [alt]="user.name" [title]="user.name"
                 class="w-6 h-6 rounded-full border border-primary object-cover" />
               }
             </div>
@@ -133,7 +133,7 @@
         </div>
 
         <div class="flex items-center gap-3 p-3 rounded-xl bg-surface-container-low border border-gray-100">
-          <img [src]="usuarioEditando.avatar" [alt]="usuarioEditando.name"
+          <img [src]="usuarioEditando.avatar | cloudinaryImage" [alt]="usuarioEditando.name"
             class="w-10 h-10 rounded-full object-cover" />
           <div class="min-w-0">
             <p class="font-bold text-sm text-on-surface truncate m-0">{{ usuarioEditando.name }}</p>

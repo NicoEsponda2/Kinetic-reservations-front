@@ -49,7 +49,7 @@
                 <div class="absolute inset-0 z-0">
                     <img [alt]="'Cancha de ' + (partido.servicio ?? '')"
                         class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        [appCachedImg]="partido.imagen_principal || (partido.servicio | sportImage)" />
+                        [appCachedImg]="(partido.imagen_principal || (partido.servicio | sportImage)) | cloudinaryImage" />
                     <div
                         class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/25 md:bg-gradient-to-r md:from-black/90 md:via-black/70 md:to-black/20">
                     </div>

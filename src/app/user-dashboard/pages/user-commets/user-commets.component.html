@@ -85,7 +85,7 @@
     <article
       class="bg-surface-container-lowest rounded-xl p-6 sm:p-7 flex flex-col md:flex-row gap-6 md:gap-8 items-start transition-all hover:bg-surface-container-low overflow-hidden">
       <div class="w-full md:w-48 h-32 rounded-lg overflow-hidden shrink-0">
-        <img [appCachedImg]="item.imagen_servicio || (item.nombre_servicio | sportImage)"
+        <img [appCachedImg]="(item.imagen_servicio || (item.nombre_servicio | sportImage)) | cloudinaryImage"
           [alt]="item.nombre_servicio || item.pista.nombre" class="w-full h-full object-cover" />
       </div>
       <div class="flex-1 min-w-0 w-full">

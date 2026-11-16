@@ -41,7 +41,7 @@
 
           <div class="bg-white p-4 rounded-xl md:col-span-2 flex flex-row items-center gap-4 shadow-sm">
             <div class="w-24 h-16 rounded-lg overflow-hidden flex-shrink-0">
-              <img [appCachedImg]="booking.imageUrl" alt="Cancha" class="w-full h-full object-cover" />
+              <img [appCachedImg]="booking.imageUrl | cloudinaryImage" alt="Cancha" class="w-full h-full object-cover" />
             </div>
             <div class="flex-grow text-left">
               <span

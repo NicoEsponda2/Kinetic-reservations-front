@@ -66,7 +66,7 @@
       [class.items-center]="isCollapsed">
       <div class="flex items-center bg-slate-800/40 rounded-xl overflow-hidden"
         [ngClass]="isCollapsed ? 'justify-center w-10 h-10 p-0.5' : 'w-full gap-2.5 px-1.5 py-1.5'">
-        <img [src]="currentUserImage" class="w-9 h-9 min-w-[36px] rounded-lg object-cover" alt="Usuario">
+        <img [src]="currentUserImage | cloudinaryImage" class="w-9 h-9 min-w-[36px] rounded-lg object-cover" alt="Usuario">
         @if (!isCollapsed) {
         <div class="flex flex-col truncate">
           <span class="text-xs font-bold text-white truncate">{{ currentUserName }}</span>

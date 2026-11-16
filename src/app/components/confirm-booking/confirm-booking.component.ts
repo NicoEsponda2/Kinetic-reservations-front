@@ -3,6 +3,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { CachedImgDirective } from '@shared/directives/cached-img.directive';
+import { CloudinaryImagePipe } from '../../pipes/cloudinary-image.pipe';
 
 export interface BookingDetail {
   courtName: string;
@@ -15,7 +16,7 @@ export interface BookingDetail {
 
 @Component({
   selector: 'app-confirm-booking',
-  imports: [CachedImgDirective],
+  imports: [CachedImgDirective, CloudinaryImagePipe],
   templateUrl: './confirm-booking.component.html',
 })
 export class ConfirmBookingComponent implements OnInit {

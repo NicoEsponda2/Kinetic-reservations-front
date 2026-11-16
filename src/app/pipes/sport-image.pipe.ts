@@ -1,4 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
+import { formatCloudinaryImageUrl } from './cloudinary-image.pipe';
 
 @Pipe({
   name: 'sportImage',
@@ -11,7 +12,7 @@ export class SportImagePipe implements PipeTransform {
     if (!servicio) return this.defaultImg;
 
     if (servicio.startsWith('http://') || servicio.startsWith('https://')) {
-      return servicio;
+      return formatCloudinaryImageUrl(servicio);
     }
 
     const s = servicio.toLowerCase();

@@ -10,10 +10,11 @@ import { AdminService } from '@dashboard/services/admin.service';
 import { Servicio } from '@user-front/interfaces/services';
 import { ToastrService } from 'ngx-toastr';
 import { CachedImgDirective } from '@shared/directives/cached-img.directive';
+import { CloudinaryImagePipe } from '../../../pipes/cloudinary-image.pipe';
 
 @Component({
   selector: 'app-park-services',
-  imports: [NgClass, TableComponent, CachedImgDirective],
+  imports: [NgClass, TableComponent, CachedImgDirective, CloudinaryImagePipe],
   templateUrl: './park-services.component.html',
 })
 export class ParkServicesComponent implements OnInit {

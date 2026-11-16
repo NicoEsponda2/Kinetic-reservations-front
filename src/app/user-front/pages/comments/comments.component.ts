@@ -16,10 +16,11 @@ import { ToastrService } from 'ngx-toastr';
 import { GlobalService } from '@user-front/services/global.service';
 import { Comentarios } from '@user-front/interfaces/services';
 import { CachedImgDirective } from '@shared/directives/cached-img.directive';
+import { CloudinaryImagePipe } from '../../../pipes/cloudinary-image.pipe';
 
 @Component({
   selector: 'app-comments',
-  imports: [RouterLink, CachedImgDirective],
+  imports: [RouterLink, CachedImgDirective, CloudinaryImagePipe],
   templateUrl: './comments.component.html',
   styleUrl: './comments.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

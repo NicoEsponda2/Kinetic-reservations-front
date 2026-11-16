@@ -16,10 +16,11 @@ import { ServicesParkService } from '@user-front/services/service-park.service';
 import { Servicio } from '@user-front/interfaces/services';
 import { AuthService } from '@auth/services/auth.service';
 import { CachedImgDirective } from '@shared/directives/cached-img.directive';
+import { CloudinaryImagePipe } from '../../../pipes/cloudinary-image.pipe';
 
 @Component({
   selector: 'app-park-services',
-  imports: [DecimalPipe, CachedImgDirective],
+  imports: [DecimalPipe, CachedImgDirective, CloudinaryImagePipe],
   templateUrl: './park-services.component.html',
   styleUrl: './park-services.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -11,6 +11,7 @@ import { UserService } from '../../services/user.service';
 import { AuthService } from '@auth/services/auth.service';
 import { ToastrService } from 'ngx-toastr';
 import { SportImagePipe } from '../../../pipes/sport-image.pipe';
+import { CloudinaryImagePipe } from '../../../pipes/cloudinary-image.pipe';
 import { SportIconPipe } from '../../../pipes/sport-icon.pipe';
 import { DiasRestantesPipe } from '../../../pipes/dias-restantes.pipe';
 import { CachedImgDirective } from '@shared/directives/cached-img.directive';
@@ -29,6 +30,7 @@ import {
     TableComponent,
     NewCommentsComponent,
     SportImagePipe,
+    CloudinaryImagePipe,
     SportIconPipe,
     DiasRestantesPipe,
     CachedImgDirective,

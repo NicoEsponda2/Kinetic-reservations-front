@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { formatCloudinaryImageUrl } from '../../pipes/cloudinary-image.pipe';
 
 const IMAGE_CACHE_NAME = 'kr-cloudinary-images-v1';
 const IMAGE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 días de persistencia en disco
@@ -55,19 +56,10 @@ export class ImageCacheService {
   }
 
   /**
-   * Optimiza automáticamente cualquier URL de Cloudinary inyectando f_auto,q_auto
-   * si aún no cuenta con transformaciones de compresión.
+   * Optimiza automáticamente cualquier URL de Cloudinary garantizando f_auto,q_auto,w_800.
    */
   optimizeCloudinaryUrl(url: string): string {
-    if (!url.includes('res.cloudinary.com') || !url.includes('/image/upload/')) {
-      return url;
-    }
-
-    if (url.includes('f_auto') || url.includes('q_auto')) {
-      return url;
-    }
-
-    return url.replace('/image/upload/', '/image/upload/f_auto,q_auto/');
+    return formatCloudinaryImageUrl(url);
   }
 
   private async loadFromCacheStorageOrNetwork(url: string): Promise<string> {

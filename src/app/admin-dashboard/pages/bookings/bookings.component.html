@@ -50,7 +50,7 @@
 
   <ng-template #usuarioTpl let-item>
     <div class="flex items-center gap-2">
-      <img [src]="item.usuarioAvatar" [alt]="item.usuarioNombre" class="w-7 h-7 rounded-full object-cover border border-slate-200 bg-slate-100">
+      <img [src]="item.usuarioAvatar | cloudinaryImage" [alt]="item.usuarioNombre" class="w-7 h-7 rounded-full object-cover border border-slate-200 bg-slate-100">
       <p class="font-medium text-slate-900 text-xs m-0">{{ item.usuarioNombre }}</p>
     </div>
   </ng-template>

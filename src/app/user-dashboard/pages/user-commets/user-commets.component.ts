@@ -3,12 +3,13 @@ import { ComentarioDetalle } from '../../interfaces/comments';
 import { ComentariosService } from '../../services/comments.service';
 import { AuthService } from '@auth/services/auth.service';
 import { SportImagePipe } from '../../../pipes/sport-image.pipe';
+import { CloudinaryImagePipe } from '../../../pipes/cloudinary-image.pipe';
 import { CachedImgDirective } from '@shared/directives/cached-img.directive';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-user-commets',
-  imports: [SportImagePipe, CachedImgDirective],
+  imports: [SportImagePipe, CloudinaryImagePipe, CachedImgDirective],
   templateUrl: './user-commets.component.html',
   styleUrl: './user-commets.component.css',
 })

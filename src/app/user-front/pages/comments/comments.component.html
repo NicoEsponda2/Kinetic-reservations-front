@@ -49,7 +49,7 @@
 
             <div class="flex items-center gap-3 pt-4 border-t border-surface-container mt-auto">
               <div class="w-10 h-10 rounded-full overflow-hidden bg-surface-container flex-shrink-0">
-                <img [appCachedImg]="comentario.avatar" [alt]="comentario.nombre" class="w-full h-full object-cover" />
+                <img [appCachedImg]="comentario.avatar | cloudinaryImage" [alt]="comentario.nombre" class="w-full h-full object-cover" />
               </div>
               <div class="flex flex-col min-w-0">
                 <span class="font-black text-secondary text-sm tracking-tight truncate">{{ comentario.nombre }}</span>

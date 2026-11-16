@@ -23,6 +23,7 @@ import {
   Servicio,
 } from '@user-front/interfaces/services';
 import { ToastrService } from 'ngx-toastr';
+import { CloudinaryImagePipe } from '../../../pipes/cloudinary-image.pipe';
 
 export interface GalleryItem {
   id?: number | string;
@@ -46,7 +47,13 @@ export interface DiaHorario {
 
 @Component({
   selector: 'app-service-form',
-  imports: [NgClass, DecimalPipe, ReactiveFormsModule, FormsModule],
+  imports: [
+    NgClass,
+    DecimalPipe,
+    ReactiveFormsModule,
+    FormsModule,
+    CloudinaryImagePipe,
+  ],
   templateUrl: './sport-form.component.html',
 })
 export class ServiceFormComponent implements OnInit, OnDestroy {

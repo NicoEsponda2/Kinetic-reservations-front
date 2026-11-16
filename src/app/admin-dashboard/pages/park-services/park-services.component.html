@@ -17,7 +17,7 @@
 
     <ng-template #servicioTpl let-servicio>
       <div class="flex items-center gap-3">
-        <img [appCachedImg]="servicio.imagen_principal" [alt]="servicio.nombre"
+        <img [appCachedImg]="servicio.imagen_principal | cloudinaryImage" [alt]="servicio.nombre"
           class="w-9 h-9 rounded-lg object-cover bg-surface-container-low" />
         <div>
           <p class="font-bold text-on-surface text-sm m-0">{{ servicio.nombre }}</p>

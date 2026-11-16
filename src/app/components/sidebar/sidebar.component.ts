@@ -2,6 +2,7 @@ import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '@auth/services/auth.service';
+import { CloudinaryImagePipe } from '../../pipes/cloudinary-image.pipe';
 
 export interface MenuItem {
   label: string;
@@ -11,7 +12,7 @@ export interface MenuItem {
 
 @Component({
   selector: 'app-sidebar',
-  imports: [NgClass, RouterLink, RouterLinkActive],
+  imports: [NgClass, RouterLink, RouterLinkActive, CloudinaryImagePipe],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.css',
 })
