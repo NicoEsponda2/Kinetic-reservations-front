@@ -67,7 +67,8 @@ export class AuthService {
   );
   private _user = signal<User | null>(this.initialUser);
   private _token = signal<string | null>(this.initialToken);
-  private cachedGoogleClientId: string | null = null;
+  private cachedGoogleClientId: string | null =
+    environment.googleClientId || null;
 
   private sessionVerified = false;
   private checkStatusInFlight$: Observable<boolean> | null = null;
