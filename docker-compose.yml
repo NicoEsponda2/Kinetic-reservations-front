@@ -17,6 +17,8 @@ services:
     environment:
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 volumes:
   kinetic_front_node_modules:

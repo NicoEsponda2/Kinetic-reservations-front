@@ -1,5 +1,3 @@
 export const environment = {
-  baseUrl: '/api',
-  googleClientId:
-    '',
+  baseUrl: 'http://104.154.111.153:3000/api',
 };
