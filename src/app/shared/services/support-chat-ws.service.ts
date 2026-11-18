@@ -46,10 +46,11 @@ const DEFAULT_QUICK_OPTIONS: QuickReplyOption[] = [
 ];
 
 const SESSION_USER_KEY = 'kr_auth_user_v2';
+const ENGINE_IO_SEPARATOR = '\x1e';
 
 /**
- * Servicio WebSocket (protocolo Socket.IO v4 sobre WebSocket nativo) para el chat híbrido
- * de Kinetic Reservations (tanto widget de cliente como módulo del administrador).
+ * Servicio Socket.IO v4 (con soporte dual WebSocket nativo + Engine.IO HTTP Long-Polling
+ * para proxies HTTPS en producción como Vercel) para el chat híbrido de Kinetic Reservations.
  */
 @Injectable({ providedIn: 'root' })
 export class SupportChatWsService {
@@ -69,6 +70,15 @@ export class SupportChatWsService {
   );
 
   private socket: WebSocket | null = null;
+  private transportMode: 'websocket' | 'polling' = 'websocket';
+  private pollingSid: string | null = null;
+  private pollingAbortController: AbortController | null = null;
+  private activePollingToken = 0;
+  private pollingTokenCounter = 0;
+  private pollingOutbox: string[] = [];
+  private isPosting = false;
+  private pendingMessages: Array<{ message: string; quickOptionId?: string }> = [];
+
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private isOpenWidget = false;
   private isAdminSubscribed = false;
@@ -92,7 +102,7 @@ export class SupportChatWsService {
    */
   joinAdminChannel(): void {
     this.isAdminSubscribed = true;
-    if (this.socket && this.socket.readyState === WebSocket.OPEN && this.isConnected()) {
+    if (this.isTransportActive() && this.isConnected()) {
       this.emitEvent('admin-join', {});
     } else {
       this.connect();
@@ -109,7 +119,10 @@ export class SupportChatWsService {
     this.emitEvent('admin-reply', {
       sessionId,
       message: clean,
-      adminName: adminName || this.getCurrentUserIdentity().userName || 'Administración Kinetic',
+      adminName:
+        adminName ||
+        this.getCurrentUserIdentity().userName ||
+        'Administración Kinetic',
     });
   }
 
@@ -139,18 +152,9 @@ export class SupportChatWsService {
       this.reconnectTimer = null;
     }
 
-    if (this.socket) {
-      this.socket.onclose = null;
-      this.socket.onerror = null;
-      this.socket.onmessage = null;
-      if (
-        this.socket.readyState === WebSocket.OPEN ||
-        this.socket.readyState === WebSocket.CONNECTING
-      ) {
-        this.socket.close();
-      }
-      this.socket = null;
-    }
+    this.cleanupWebSocket();
+    this.cleanupPolling();
+    this.pendingMessages = [];
 
     this.sessionId = this.generateSessionId();
     this.isConnected.set(false);
@@ -167,25 +171,79 @@ export class SupportChatWsService {
   }
 
   /**
-   * Inicia la conexión WebSocket con el gateway de NestJS si aún no está activa.
+   * Inicia la conexión con el gateway Socket.IO de NestJS (WebSocket en desarrollo
+   * o HTTP Long-Polling en producción HTTPS detrás de Vercel Rewrite).
    */
   connect(): void {
-    if (
-      typeof window === 'undefined' ||
-      (this.socket &&
-        (this.socket.readyState === WebSocket.OPEN ||
-          this.socket.readyState === WebSocket.CONNECTING))
-    ) {
+    if (typeof window === 'undefined' || this.isTransportActive()) {
       return;
     }
 
+    if (this.shouldUseHttpPolling()) {
+      void this.connectPolling();
+    } else {
+      this.connectWebSocket();
+    }
+  }
+
+  /**
+   * Envía un mensaje de texto libre o una opción rápida seleccionada al servidor.
+   */
+  sendMessage(message: string, quickOptionId?: string): void {
+    const clean = message.trim();
+    if (!clean) return;
+
+    if (!this.isTransportActive() || !this.isConnected()) {
+      this.pendingMessages.push({ message: clean, quickOptionId });
+      this.connect();
+      return;
+    }
+
+    this.dispatchClientMessage(clean, quickOptionId);
+  }
+
+  /**
+   * Determina si hay una conexión o intento de conexión activo en curso.
+   */
+  private isTransportActive(): boolean {
+    const wsActive =
+      this.socket !== null &&
+      (this.socket.readyState === WebSocket.OPEN ||
+        this.socket.readyState === WebSocket.CONNECTING);
+    const pollingActive = this.activePollingToken !== 0;
+    return wsActive || pollingActive;
+  }
+
+  /**
+   * En producción sobre HTTPS con proxy relativo (/api en Vercel), utiliza
+   * directamente el transporte HTTP Long-Polling de Socket.IO para evitar errores
+   * de protocolo wss:// no soportado por Vercel Rewrites.
+   */
+  private shouldUseHttpPolling(): boolean {
+    const base = environment.baseUrl.trim();
+    const isRelativeBase =
+      !base.startsWith('http://') && !base.startsWith('https://');
+    const isHttps = window.location.protocol === 'https:';
+    return isRelativeBase && isHttps;
+  }
+
+  /**
+   * Inicia el transporte WebSocket nativo y hace fallback a HTTP Polling si falla la apertura.
+   */
+  private connectWebSocket(): void {
+    this.transportMode = 'websocket';
     const wsUrl = this.buildSocketIoWsUrl();
     const ws = new WebSocket(wsUrl);
     this.socket = ws;
+    let openedOnce = false;
+
+    ws.onopen = () => {
+      openedOnce = true;
+    };
 
     ws.onmessage = (event: MessageEvent<string>) => {
       this.ngZone.run(() => {
-        this.handleRawPacket(String(event.data ?? ''));
+        this.handleIncomingPayload(String(event.data ?? ''));
       });
     };
 
@@ -194,6 +252,12 @@ export class SupportChatWsService {
         this.isConnected.set(false);
         this.isTyping.set(false);
         this.socket = null;
+
+        if (!openedOnce && (this.isOpenWidget || this.isAdminSubscribed)) {
+          void this.connectPolling();
+          return;
+        }
+
         if (this.isOpenWidget || this.isAdminSubscribed) {
           this.scheduleReconnect();
         }
@@ -206,20 +270,136 @@ export class SupportChatWsService {
   }
 
   /**
-   * Envía un mensaje de texto libre o una opción rápida seleccionada al servidor WebSocket.
+   * Inicia el transporte oficial Engine.IO v4 HTTP Long-Polling (`transport=polling`)
+   * compatible con el proxy HTTPS de Vercel hacia el backend en GCP.
    */
-  sendMessage(message: string, quickOptionId?: string): void {
-    const clean = message.trim();
-    if (!clean) return;
-
-    if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
-      this.connect();
+  private async connectPolling(): Promise<void> {
+    if (this.activePollingToken !== 0) {
       return;
     }
 
+    this.transportMode = 'polling';
+    const token = ++this.pollingTokenCounter;
+    this.activePollingToken = token;
+    this.pollingSid = null;
+    this.pollingOutbox = [];
+    this.isPosting = false;
+
+    const abortController = new AbortController();
+    this.pollingAbortController = abortController;
+    const pollingEndpoint = this.buildSocketIoPollingUrl();
+
+    try {
+      const openRes = await fetch(
+        `${pollingEndpoint}?EIO=4&transport=polling&t=${Date.now()}`,
+        {
+          method: 'GET',
+          cache: 'no-store',
+          signal: abortController.signal,
+        },
+      );
+
+      if (!openRes.ok) {
+        throw new Error(`Engine.IO handshake status ${openRes.status}`);
+      }
+
+      const openBody = await openRes.text();
+      if (this.activePollingToken !== token) return;
+
+      const firstPacket = openBody.split(ENGINE_IO_SEPARATOR)[0] ?? '';
+      if (!firstPacket.startsWith('0')) {
+        throw new Error('Invalid Engine.IO handshake packet');
+      }
+
+      const handshake = JSON.parse(firstPacket.slice(1)) as { sid?: string };
+      if (!handshake.sid) {
+        throw new Error('Missing Engine.IO sid');
+      }
+
+      this.pollingSid = handshake.sid;
+
+      this.ngZone.run(() => {
+        this.handleIncomingPayload(openBody);
+      });
+      await this.flushPollingOutbox();
+
+      while (this.activePollingToken === token && this.pollingSid) {
+        const pollRes = await fetch(
+          `${pollingEndpoint}?EIO=4&transport=polling&sid=${encodeURIComponent(this.pollingSid)}&t=${Date.now()}`,
+          {
+            method: 'GET',
+            cache: 'no-store',
+            signal: abortController.signal,
+          },
+        );
+
+        if (!pollRes.ok) {
+          throw new Error(`Engine.IO poll status ${pollRes.status}`);
+        }
+
+        const payload = await pollRes.text();
+        if (this.activePollingToken !== token) return;
+
+        this.ngZone.run(() => {
+          this.handleIncomingPayload(payload);
+        });
+        await this.flushPollingOutbox();
+      }
+    } catch {
+      if (this.activePollingToken !== token) {
+        return;
+      }
+
+      this.ngZone.run(() => {
+        this.cleanupPolling();
+        this.isConnected.set(false);
+        this.isTyping.set(false);
+        if (this.isOpenWidget || this.isAdminSubscribed) {
+          this.scheduleReconnect();
+        }
+      });
+    }
+  }
+
+  /**
+   * Cierra y limpia cualquier conexión WebSocket activa.
+   */
+  private cleanupWebSocket(): void {
+    if (!this.socket) return;
+    this.socket.onopen = null;
+    this.socket.onclose = null;
+    this.socket.onerror = null;
+    this.socket.onmessage = null;
+    if (
+      this.socket.readyState === WebSocket.OPEN ||
+      this.socket.readyState === WebSocket.CONNECTING
+    ) {
+      this.socket.close();
+    }
+    this.socket = null;
+  }
+
+  /**
+   * Cancela y limpia el ciclo de HTTP Long-Polling activo.
+   */
+  private cleanupPolling(): void {
+    this.activePollingToken = 0;
+    this.pollingSid = null;
+    this.pollingOutbox = [];
+    this.isPosting = false;
+    if (this.pollingAbortController) {
+      this.pollingAbortController.abort();
+      this.pollingAbortController = null;
+    }
+  }
+
+  /**
+   * Construye y emite un paquete `message-from-client` con la identidad actual.
+   */
+  private dispatchClientMessage(message: string, quickOptionId?: string): void {
     const { userName, userEmail } = this.getCurrentUserIdentity();
     this.emitEvent('message-from-client', {
-      message: clean,
+      message,
       quickOptionId,
       sessionId: this.sessionId,
       userName,
@@ -228,18 +408,87 @@ export class SupportChatWsService {
   }
 
   /**
-   * Emite un evento Socket.IO v4 (`42["evento", payload]`) sobre el WebSocket activo.
+   * Emite un evento Socket.IO v4 (`42["evento", payload]`) sobre el transporte activo.
    */
   private emitEvent(eventName: string, data: unknown): void {
-    if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
-      return;
-    }
     const payload = JSON.stringify([eventName, data]);
-    this.socket.send(`42${payload}`);
+    this.sendRawPacket(`42${payload}`);
   }
 
   /**
-   * Construye la URL WebSocket compatible con desarrollo (Docker local) y producción (GCP).
+   * Envía una trama Engine.IO / Socket.IO por WebSocket o la encola en el canal HTTP POST.
+   */
+  private sendRawPacket(packet: string): void {
+    if (this.transportMode === 'websocket') {
+      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+        this.socket.send(packet);
+      }
+      return;
+    }
+
+    this.pollingOutbox.push(packet);
+    void this.flushPollingOutbox();
+  }
+
+  /**
+   * Despacha en orden secuencial los paquetes pendientes por HTTP POST evitando colisiones en Engine.IO.
+   */
+  private async flushPollingOutbox(): Promise<void> {
+    if (
+      this.isPosting ||
+      !this.pollingSid ||
+      this.activePollingToken === 0 ||
+      this.pollingOutbox.length === 0
+    ) {
+      return;
+    }
+
+    this.isPosting = true;
+    const token = this.activePollingToken;
+    const sid = this.pollingSid;
+    const pollingEndpoint = this.buildSocketIoPollingUrl();
+
+    try {
+      while (
+        this.pollingOutbox.length > 0 &&
+        this.activePollingToken === token &&
+        this.pollingSid === sid
+      ) {
+        const batch = this.pollingOutbox.splice(0, this.pollingOutbox.length);
+        const body = batch.join(ENGINE_IO_SEPARATOR);
+
+        const res = await fetch(
+          `${pollingEndpoint}?EIO=4&transport=polling&sid=${encodeURIComponent(sid)}&t=${Date.now()}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+            body,
+            signal: this.pollingAbortController?.signal,
+          },
+        );
+
+        if (!res.ok) {
+          throw new Error(`Engine.IO POST status ${res.status}`);
+        }
+      }
+    } catch {
+      if (this.activePollingToken === token) {
+        this.ngZone.run(() => {
+          this.cleanupPolling();
+          this.isConnected.set(false);
+          this.isTyping.set(false);
+          if (this.isOpenWidget || this.isAdminSubscribed) {
+            this.scheduleReconnect();
+          }
+        });
+      }
+    } finally {
+      this.isPosting = false;
+    }
+  }
+
+  /**
+   * Construye la URL WebSocket para entorno de desarrollo local o backend con URL explícita.
    */
   private buildSocketIoWsUrl(): string {
     const base = environment.baseUrl.trim();
@@ -256,18 +505,41 @@ export class SupportChatWsService {
   }
 
   /**
-   * Procesa los paquetes del protocolo Engine.IO / Socket.IO v4.
+   * Construye la URL de Engine.IO HTTP Long-Polling compatible con `vercel.json` (`/socket.io/:path*`).
+   */
+  private buildSocketIoPollingUrl(): string {
+    const base = environment.baseUrl.trim();
+    if (base.startsWith('http://') || base.startsWith('https://')) {
+      const httpOrigin = base.replace(/\/api\/?$/, '');
+      return `${httpOrigin}/socket.io/polling`;
+    }
+    return '/socket.io/polling';
+  }
+
+  /**
+   * Divide tramas múltiples separadas por `\x1e` y las procesa secuencialmente.
+   */
+  private handleIncomingPayload(payload: string): void {
+    if (!payload) return;
+    const packets = payload.split(ENGINE_IO_SEPARATOR);
+    for (const packet of packets) {
+      this.handleRawPacket(packet);
+    }
+  }
+
+  /**
+   * Procesa cada paquete individual del protocolo Engine.IO / Socket.IO v4.
    */
   private handleRawPacket(raw: string): void {
     if (!raw) return;
 
     if (raw.startsWith('0')) {
-      this.socket?.send('40');
+      this.sendRawPacket('40');
       return;
     }
 
     if (raw === '2') {
-      this.socket?.send('3');
+      this.sendRawPacket('3');
       return;
     }
 
@@ -279,8 +551,19 @@ export class SupportChatWsService {
         userName,
         userEmail,
       });
+
       if (this.isAdminSubscribed) {
         this.emitEvent('admin-join', {});
+      }
+
+      if (this.pendingMessages.length > 0) {
+        const queued = this.pendingMessages.splice(
+          0,
+          this.pendingMessages.length,
+        );
+        for (const item of queued) {
+          this.dispatchClientMessage(item.message, item.quickOptionId);
+        }
       }
       return;
     }
@@ -317,7 +600,11 @@ export class SupportChatWsService {
       return;
     }
 
-    if (eventName === 'message-from-server' && data && typeof data === 'object') {
+    if (
+      eventName === 'message-from-server' &&
+      data &&
+      typeof data === 'object'
+    ) {
       const incoming = data as SupportChatMessage;
       if (incoming.options?.length) {
         this.quickOptions.set(incoming.options);
@@ -368,7 +655,10 @@ export class SupportChatWsService {
    * Genera un identificador único de sesión para la conversación actual.
    */
   private generateSessionId(): string {
-    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    if (
+      typeof crypto !== 'undefined' &&
+      typeof crypto.randomUUID === 'function'
+    ) {
       return crypto.randomUUID();
     }
     return `kr-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
