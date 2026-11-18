@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CookieConsentComponent } from '@shared/components/cookie-consent/cookie-consent.component';
+import { SupportChatComponent } from '@shared/components/support-chat/support-chat.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, CookieConsentComponent],
+  imports: [RouterOutlet, CookieConsentComponent, SupportChatComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })

@@ -19,6 +19,7 @@ import {
 import { User } from '@auth/interfaces/user.interface';
 import { Router } from '@angular/router';
 import { HttpCacheService } from '@shared/services/http-cache.service';
+import { SupportChatWsService } from '@shared/services/support-chat-ws.service';
 
 declare global {
   interface Window {
@@ -77,6 +78,7 @@ export class AuthService {
   private router = inject(Router);
   private ngZone = inject(NgZone);
   private httpCache = inject(HttpCacheService);
+  private supportChatWs = inject(SupportChatWsService);
 
   authStatus = computed<AuthStatus>(() => {
     if (this._authStatus() === 'checking') return 'checking';
@@ -290,6 +292,7 @@ export class AuthService {
     localStorage.removeItem('token');
     this.clearCachedUser();
     this.httpCache.invalidateAuthenticated();
+    this.supportChatWs.resetSession();
   }
 
   private handleAuthSuccess({
@@ -301,6 +304,7 @@ export class AuthService {
     this.updateUser(usuario);
     this._token.set(token);
     localStorage.setItem('token', token);
+    this.supportChatWs.resetSession();
     return [true, 'Autenticación exitosa'];
   }
 

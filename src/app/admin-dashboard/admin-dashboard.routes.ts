@@ -57,6 +57,14 @@ export const adminDashboardRoutes: Routes = [
           ),
       },
       {
+        path: 'chat-soporte',
+        title: 'Chat Soporte - Admin Dashboard',
+        loadComponent: () =>
+          import('./pages/support-chat/admin-support-chat.component').then(
+            (m) => m.AdminSupportChatComponent,
+          ),
+      },
+      {
         path: 'nuevo-servicio',
         loadComponent: () =>
           import('./pages/new-service/new-service.component').then(

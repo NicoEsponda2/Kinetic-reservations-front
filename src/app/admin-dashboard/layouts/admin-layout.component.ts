@@ -18,5 +18,6 @@ export class AdminLayoutComponent {
     { label: 'Usuarios', icon: 'groups', route: '/admin/users' },
     { label: 'Comentarios', icon: 'comment', route: '/admin/comentarios' },
     { label: 'Servicios', icon: 'payments', route: '/admin/servicios' },
+    { label: 'Chat Soporte', icon: 'support_agent', route: '/admin/chat-soporte' },
   ];
 }
