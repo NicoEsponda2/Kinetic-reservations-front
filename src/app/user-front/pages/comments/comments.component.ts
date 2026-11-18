@@ -17,6 +17,7 @@ import { GlobalService } from '@user-front/services/global.service';
 import { Comentarios } from '@user-front/interfaces/services';
 import { CachedImgDirective } from '@shared/directives/cached-img.directive';
 import { CloudinaryImagePipe } from '../../../pipes/cloudinary-image.pipe';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-comments',
@@ -38,6 +39,7 @@ export class CommentsComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly ngZone = inject(NgZone);
 
   readonly comentarios = signal<Comentarios[]>([]);
+  readonly cargando = signal(true);
   readonly canPrev = signal<boolean>(false);
   readonly canNext = signal<boolean>(false);
 
@@ -45,13 +47,18 @@ export class CommentsComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly onScrollBound = () => this.updateNavState();
 
   ngOnInit(): void {
-    this.comentariosService.obtenerComentariosInicio().subscribe({
-      next: (data) => {
-        this.comentarios.set(data ?? []);
-        requestAnimationFrame(() => this.updateNavState());
-      },
-      error: (err) => this.toastr.error(err),
-    });
+    this.comentariosService
+      .obtenerComentariosInicio()
+      .pipe(
+        finalize(() => {
+          this.cargando.set(false);
+          requestAnimationFrame(() => this.updateNavState());
+        }),
+      )
+      .subscribe({
+        next: (data) => this.comentarios.set(data ?? []),
+        error: (err) => this.toastr.error(err),
+      });
   }
 
   ngAfterViewInit(): void {

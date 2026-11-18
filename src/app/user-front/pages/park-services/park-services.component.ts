@@ -17,6 +17,7 @@ import { Servicio } from '@user-front/interfaces/services';
 import { AuthService } from '@auth/services/auth.service';
 import { CachedImgDirective } from '@shared/directives/cached-img.directive';
 import { CloudinaryImagePipe } from '../../../pipes/cloudinary-image.pipe';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-park-services',
@@ -37,6 +38,7 @@ export class ParkServicesComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly ngZone = inject(NgZone);
 
   readonly servicios = signal<Servicio[]>([]);
+  readonly cargando = signal(true);
   readonly canPrev = signal<boolean>(false);
   readonly canNext = signal<boolean>(false);
 
@@ -44,10 +46,15 @@ export class ParkServicesComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly onScrollBound = () => this.updateNavState();
 
   ngOnInit(): void {
-    this.listServices.obtenerServicios().subscribe((data) => {
-      this.servicios.set(data ?? []);
-      requestAnimationFrame(() => this.updateNavState());
-    });
+    this.listServices
+      .obtenerServicios()
+      .pipe(
+        finalize(() => {
+          this.cargando.set(false);
+          requestAnimationFrame(() => this.updateNavState());
+        }),
+      )
+      .subscribe((data) => this.servicios.set(data ?? []));
   }
 
   ngAfterViewInit(): void {

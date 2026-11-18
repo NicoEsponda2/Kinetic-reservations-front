@@ -19,9 +19,47 @@
     </div>
 
     <div class="relative mx-auto px-1 sm:px-11 md:px-12">
+      @if (cargando()) {
+        <p class="sr-only" role="status" aria-live="polite">Cargando comentarios de la comunidad</p>
+      }
       <div
         #commentsTrack
+        [attr.aria-busy]="cargando()"
         class="flex items-stretch overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar gap-3.5 sm:gap-4 2xl:gap-5 py-4">
+        @if (cargando()) {
+          @for (placeholder of [1, 2, 3, 4]; track placeholder) {
+            <div
+              aria-hidden="true"
+              class="shrink-0 snap-start w-full sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-3rem)/4)] 2xl:w-[calc((100%-3.75rem)/4)] flex">
+              <div
+                class="bg-white p-5 sm:p-6 min-h-[220px] sm:min-h-[260px] lg:min-h-[290px] w-full h-full flex flex-col rounded-xl shadow-sm border-l-4 border-slate-200 animate-pulse motion-reduce:animate-none">
+                <div class="flex justify-between items-start gap-3 mb-5">
+                  <div class="space-y-2 flex-1">
+                    <div class="h-2.5 w-20 rounded bg-slate-200"></div>
+                    <div class="h-5 w-3/4 rounded-md bg-slate-200"></div>
+                  </div>
+                  <div class="flex gap-1 shrink-0">
+                    @for (star of [1, 2, 3, 4, 5]; track star) {
+                      <div class="h-4 w-4 rounded bg-slate-200"></div>
+                    }
+                  </div>
+                </div>
+                <div class="space-y-2.5 flex-1 py-1">
+                  <div class="h-3.5 w-full rounded bg-slate-200/80"></div>
+                  <div class="h-3.5 w-11/12 rounded bg-slate-200/80"></div>
+                  <div class="h-3.5 w-3/4 rounded bg-slate-100"></div>
+                </div>
+                <div class="flex items-center gap-3 pt-4 border-t border-surface-container mt-4">
+                  <div class="w-10 h-10 rounded-full bg-slate-200 shrink-0"></div>
+                  <div class="space-y-2 flex-1">
+                    <div class="h-3.5 w-28 rounded bg-slate-200"></div>
+                    <div class="h-2.5 w-20 rounded bg-slate-100"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        } @else {
         @for (comentario of comentarios(); track $index) {
         <div
           class="shrink-0 snap-start w-full sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-3rem)/4)] 2xl:w-[calc((100%-3.75rem)/4)] flex">
@@ -61,13 +99,14 @@
 
         </div>
         }
+        }
       </div>
 
       <button
         type="button"
         aria-label="Comentario anterior"
         (click)="scrollStep(-1)"
-        [disabled]="!canPrev()"
+        [disabled]="cargando() || !canPrev()"
         class="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 sm:bg-white/80 backdrop-blur-md border border-surface-container hover:bg-primary text-secondary hover:text-white p-2 sm:p-2.5 rounded-full shadow-lg transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:pointer-events-none group">
         <span
           class="material-symbols-outlined text-xl sm:text-2xl transition-transform group-hover:-translate-x-0.5">arrow_back</span>
@@ -76,7 +115,7 @@
         type="button"
         aria-label="Siguiente comentario"
         (click)="scrollStep(1)"
-        [disabled]="!canNext()"
+        [disabled]="cargando() || !canNext()"
         class="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 sm:bg-white/80 backdrop-blur-md border border-surface-container hover:bg-primary text-secondary hover:text-white p-2 sm:p-2.5 rounded-full shadow-lg transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:pointer-events-none group">
         <span
           class="material-symbols-outlined text-xl sm:text-2xl transition-transform group-hover:translate-x-0.5">arrow_forward</span>

@@ -20,9 +20,36 @@
     </div>
 
     <div class="relative mx-auto px-1 sm:px-11 md:px-12">
+      @if (cargando()) {
+        <p class="sr-only" role="status" aria-live="polite">Cargando servicios deportivos</p>
+      }
       <div
         #servicesTrack
+        [attr.aria-busy]="cargando()"
         class="flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar gap-3.5 sm:gap-4 lg:gap-5 xl:gap-6 py-4">
+        @if (cargando()) {
+          @for (placeholder of [1, 2, 3]; track placeholder) {
+            <div
+              aria-hidden="true"
+              class="shrink-0 snap-start w-full sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-2.5rem)/3)] xl:w-[calc((100%-3rem)/3)] flex justify-center items-center">
+              <div
+                class="relative w-full max-w-[320px] sm:max-w-[330px] h-[340px] sm:h-[380px] rounded-3xl overflow-hidden shadow-xl bg-slate-200 animate-pulse motion-reduce:animate-none flex flex-col justify-between p-4 sm:p-5">
+                <div class="absolute inset-0 bg-gradient-to-br from-slate-200 via-slate-100 to-slate-300"></div>
+                <div class="relative z-10 h-8 w-20 rounded-2xl bg-white/75"></div>
+                <div class="relative z-10 flex flex-col gap-3 mt-auto">
+                  <div class="self-end h-12 w-28 rounded-2xl bg-white/75"></div>
+                  <div class="space-y-3">
+                    <div class="h-7 w-3/5 rounded-lg bg-white/80"></div>
+                    <div class="flex gap-2">
+                      <div class="h-6 w-24 rounded-full bg-white/60"></div>
+                      <div class="h-6 w-20 rounded-full bg-white/50"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        } @else {
         @for (servicio of servicios(); track servicio.id_deporte || $index) {
         <div
           class="shrink-0 snap-start w-full sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-2.5rem)/3)] xl:w-[calc((100%-3rem)/3)] flex justify-center items-center">
@@ -102,13 +129,14 @@
 
         </div>
         }
+        }
       </div>
 
       <button
         type="button"
         aria-label="Servicio anterior"
         (click)="scrollStep(-1)"
-        [disabled]="!canPrev()"
+        [disabled]="cargando() || !canPrev()"
         class="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 sm:bg-white/80 backdrop-blur-md border border-surface-container hover:bg-primary text-secondary hover:text-white p-2 sm:p-2.5 rounded-full shadow-lg transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:pointer-events-none group">
         <span
           class="material-symbols-outlined text-xl sm:text-2xl transition-transform group-hover:-translate-x-0.5">arrow_back</span>
@@ -117,7 +145,7 @@
         type="button"
         aria-label="Siguiente servicio"
         (click)="scrollStep(1)"
-        [disabled]="!canNext()"
+        [disabled]="cargando() || !canNext()"
         class="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 sm:bg-white/80 backdrop-blur-md border border-surface-container hover:bg-primary text-secondary hover:text-white p-2 sm:p-2.5 rounded-full shadow-lg transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:pointer-events-none group">
         <span
           class="material-symbols-outlined text-xl sm:text-2xl transition-transform group-hover:translate-x-0.5">arrow_forward</span>
