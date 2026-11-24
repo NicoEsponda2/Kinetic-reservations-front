@@ -180,7 +180,7 @@
           }
         </div>
         } @else {
-        <div class="dark-scrollbar space-y-2.5 max-h-52 overflow-y-auto pr-2">
+        <div class="dark-scrollbar space-y-2.5 max-h-64 overflow-y-auto pr-2">
           @for (pista of estadoPistas(); track pista.id_pista) {
             <div class="dark-list-item">
               <div class="flex flex-col">
@@ -202,17 +202,6 @@
               No hay pistas activas registradas.
             </p>
           }
-        </div>
-        }
-      </div>
-
-      <div class="mt-5 pt-4 border-t border-surface-variant/20">
-        @if (isLoading()) {
-        <div class="h-4 w-44 bg-white/15 rounded animate-pulse"></div>
-        } @else {
-        <div class="flex items-center gap-2 text-surface-container-lowest">
-          <span class="material-symbols-outlined text-primary-fixed-dim text-base">schedule</span>
-          <span class="text-xs font-bold">{{ proximoCierre() }}</span>
         </div>
         }
       </div>

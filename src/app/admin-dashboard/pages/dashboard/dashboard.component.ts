@@ -206,11 +206,6 @@ export class DashboardComponent implements OnInit {
     () => this.dashboardData()?.estadoPistas ?? [],
   );
 
-  readonly proximoCierre = computed<string>(
-    () =>
-      this.dashboardData()?.proximoCierre ?? '22:00 - Cierre y Mantenimiento',
-  );
-
   readonly reservas = computed<AdminBookingItem[]>(
     () => this.dashboardData()?.proximasReservas ?? [],
   );
@@ -339,7 +334,7 @@ export class DashboardComponent implements OnInit {
         {
           sheetName: 'Estado de Pistas',
           title: 'Estado Operativo de Pistas e Instalaciones',
-          subtitle: `Horario de cierre programado: ${data.proximoCierre}`,
+          subtitle: 'Disponibilidad y turnos registrados por instalación',
           data: data.estadoPistas,
           columns: [
             {

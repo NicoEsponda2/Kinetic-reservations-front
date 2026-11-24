@@ -93,14 +93,26 @@ export class AdminService {
   private readonly http = inject(HttpClient);
 
   obtenerDatosDashboard(): Observable<AdminDashboardData> {
-    return this.http
-      .get<{ ok: boolean; data: AdminDashboardData }>(
+    return forkJoin({
+      dashboardResp: this.http.get<{ ok: boolean; data: AdminDashboardData }>(
         `${baseUrl}/admin/dashboard`,
-      )
-      .pipe(
-        map((resp) => resp.data),
-        catchError(() => this.buildDashboardFromExistingEndpoints()),
-      );
+        { headers: { 'x-skip-cache': 'true' } },
+      ),
+      reservasResp: this.http
+        .get<any>(`${baseUrl}/bookings/admin/bookings-history`, {
+          headers: { 'x-skip-cache': 'true' },
+        })
+        .pipe(catchError(() => of(null))),
+    }).pipe(
+      map(({ dashboardResp, reservasResp }) => {
+        const data = dashboardResp.data;
+        if (Array.isArray(reservasResp?.data)) {
+          return this.syncRealCourtStatus(data, reservasResp.data);
+        }
+        return data;
+      }),
+      catchError(() => this.buildDashboardFromExistingEndpoints()),
+    );
   }
 
   buscarUsuarios(): Observable<AdminUsersResponse> {
@@ -204,6 +216,128 @@ export class AdminService {
   }
 
   /**
+   * Sincroniza el estado real de las canchas (OCUPADA / LIBRE y turnos de hoy)
+   * cruzando las pistas con las reservas reales del día actual en horario de Chile (America/Santiago).
+   */
+  private syncRealCourtStatus(
+    dashboard: AdminDashboardData,
+    reservasRaw: any[],
+  ): AdminDashboardData {
+    if (!dashboard?.estadoPistas?.length) {
+      return dashboard;
+    }
+
+    const { date: hoyIso, minutes: ahoraMinutos } =
+      this.getChileBusinessDateTime();
+    const statsById = new Map<
+      number,
+      {
+        hoy: number;
+        totales: number;
+        ocupadaAhora: boolean;
+        turnosVigentesHoy: number;
+      }
+    >();
+    const statsByNombre = new Map<
+      string,
+      {
+        hoy: number;
+        totales: number;
+        ocupadaAhora: boolean;
+        turnosVigentesHoy: number;
+      }
+    >();
+
+    for (const r of reservasRaw) {
+      const estadoLower = String(r.estado || '')
+        .toLowerCase()
+        .trim();
+      const esCancelada =
+        estadoLower === 'cancelada' || estadoLower === 'cancelado';
+      if (esCancelada) continue;
+
+      const fechaStr = String(r.fecha || '').split('T')[0];
+      const inicioMin = this.timeToMinutes(r.hora_inicio);
+      const terminoMin = r.hora_termino
+        ? this.timeToMinutes(r.hora_termino)
+        : inicioMin + 60;
+      const esHoy = fechaStr === hoyIso;
+      const enCurso =
+        esHoy && inicioMin <= ahoraMinutos && ahoraMinutos < terminoMin;
+      const vigenteHoy = esHoy && terminoMin > ahoraMinutos;
+
+      const idPista = Number(r.id_pista);
+      if (idPista) {
+        const prev = statsById.get(idPista) ?? {
+          hoy: 0,
+          totales: 0,
+          ocupadaAhora: false,
+          turnosVigentesHoy: 0,
+        };
+        prev.totales += 1;
+        if (esHoy) prev.hoy += 1;
+        if (enCurso) prev.ocupadaAhora = true;
+        if (vigenteHoy) prev.turnosVigentesHoy += 1;
+        statsById.set(idPista, prev);
+      }
+
+      const nombreCompuesto = `${r.servicio || ''} (${r.pista || ''})`
+        .toLowerCase()
+        .trim();
+      const prevNombre = statsByNombre.get(nombreCompuesto) ?? {
+        hoy: 0,
+        totales: 0,
+        ocupadaAhora: false,
+        turnosVigentesHoy: 0,
+      };
+      prevNombre.totales += 1;
+      if (esHoy) prevNombre.hoy += 1;
+      if (enCurso) prevNombre.ocupadaAhora = true;
+      if (vigenteHoy) prevNombre.turnosVigentesHoy += 1;
+      statsByNombre.set(nombreCompuesto, prevNombre);
+    }
+
+    const estadoPistas: AdminCourtStatus[] = dashboard.estadoPistas.map(
+      (pista) => {
+        const keyNombre = String(pista.nombre || '')
+          .toLowerCase()
+          .trim();
+        const stats = statsById.get(Number(pista.id_pista)) ??
+          statsByNombre.get(keyNombre) ?? {
+            hoy: 0,
+            totales: 0,
+            ocupadaAhora: false,
+            turnosVigentesHoy: 0,
+          };
+        const isOcupada = stats.ocupadaAhora || stats.turnosVigentesHoy > 0;
+
+        return {
+          ...pista,
+          reservasHoy: stats.hoy,
+          reservasTotales: stats.totales,
+          estado: isOcupada ? 'OCUPADA' : 'LIBRE',
+        };
+      },
+    );
+
+    const totalPistas = estadoPistas.length;
+    const ocupadas = estadoPistas.filter((p) => p.estado === 'OCUPADA').length;
+    const tasaOcupacion =
+      totalPistas > 0
+        ? Math.min(100, Math.round((ocupadas / totalPistas) * 100))
+        : 0;
+
+    return {
+      ...dashboard,
+      kpis: {
+        ...dashboard.kpis,
+        tasaOcupacion,
+      },
+      estadoPistas,
+    };
+  }
+
+  /**
    * Respaldo reactivo que construye el modelo del Dashboard usando los endpoints de reservas y deportes
    * en caso de que el contenedor backend aún no haya recargado la ruta /api/admin/dashboard.
    */
@@ -216,12 +350,15 @@ export class AdminService {
     }).pipe(
       map(({ reservasResp, servicios }) => {
         const reservasRaw: any[] = reservasResp?.data || [];
-        const hoyIso = this.formatIsoDate(new Date());
-        const hayReservasHoy = reservasRaw.some((r) => r.fecha === hoyIso);
+        const { date: hoyIso, minutes: ahoraMinutos } =
+          this.getChileBusinessDateTime();
+        const hayReservasHoy = reservasRaw.some(
+          (r) => String(r.fecha || '').split('T')[0] === hoyIso,
+        );
         const fechaRefIso =
           hayReservasHoy || reservasRaw.length === 0
             ? hoyIso
-            : reservasRaw[0].fecha;
+            : String(reservasRaw[0].fecha || '').split('T')[0];
 
         const [refYear, refMonth, refDay] = String(fechaRefIso)
           .split('-')
@@ -262,7 +399,12 @@ export class AdminService {
         >();
         const actividadPorPistaClave = new Map<
           string,
-          { hoy: number; totales: number }
+          {
+            hoy: number;
+            totales: number;
+            ocupadaAhora: boolean;
+            turnosVigentesHoy: number;
+          }
         >();
 
         for (const r of reservasRaw) {
@@ -294,19 +436,33 @@ export class AdminService {
               ingresosMesAnterior += monto;
               reservasMesAnterior += 1;
             }
+          } else if (esPendiente) {
+            pagosPendientes += 1;
+          }
 
+          if (!esCancelada) {
             const clavePista = `${r.servicio || ''}|${r.pista || ''}`;
             const statPista = actividadPorPistaClave.get(clavePista) ?? {
               hoy: 0,
               totales: 0,
+              ocupadaAhora: false,
+              turnosVigentesHoy: 0,
             };
             statPista.totales += 1;
-            if (fechaStr === fechaRefIso) {
+            if (fechaStr === hoyIso) {
               statPista.hoy += 1;
+              const inicioMin = this.timeToMinutes(r.hora_inicio);
+              const terminoMin = r.hora_termino
+                ? this.timeToMinutes(r.hora_termino)
+                : inicioMin + 60;
+              if (inicioMin <= ahoraMinutos && ahoraMinutos < terminoMin) {
+                statPista.ocupadaAhora = true;
+              }
+              if (terminoMin > ahoraMinutos) {
+                statPista.turnosVigentesHoy += 1;
+              }
             }
             actividadPorPistaClave.set(clavePista, statPista);
-          } else if (esPendiente) {
-            pagosPendientes += 1;
           }
 
           const statDia = conteoPorFecha.get(fechaStr) ?? {
@@ -332,7 +488,11 @@ export class AdminService {
             const stats = actividadPorPistaClave.get(clave) ?? {
               hoy: 0,
               totales: 0,
+              ocupadaAhora: false,
+              turnosVigentesHoy: 0,
             };
+            const isOcupada = stats.ocupadaAhora || stats.turnosVigentesHoy > 0;
+
             estadoPistas.push({
               id_pista: p.id_pista || fallbackId++,
               nombre: `${srv.nombre} (${p.nombre})`,
@@ -340,8 +500,7 @@ export class AdminService {
               precioHora: Number(p.precio_hora) || 0,
               reservasHoy: stats.hoy,
               reservasTotales: stats.totales,
-              estado:
-                stats.hoy > 0 || stats.totales > 0 ? 'OCUPADA' : 'LIBRE',
+              estado: isOcupada ? 'OCUPADA' : 'LIBRE',
             });
           }
         }
@@ -353,9 +512,7 @@ export class AdminService {
         const tasaOcupacion =
           totalPistas > 0
             ? Math.min(100, Math.round((ocupadas / totalPistas) * 100))
-            : reservasActivas > 0
-              ? 60
-              : 0;
+            : 0;
 
         const crecimientoIngresos = this.calcGrowth(
           ingresosMesActual,
@@ -472,6 +629,34 @@ export class AdminService {
       });
     }
     return series;
+  }
+
+  private getChileBusinessDateTime(now: Date = new Date()): {
+    date: string;
+    minutes: number;
+  } {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Santiago',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    }).formatToParts(now);
+
+    const get = (t: Intl.DateTimeFormatPartTypes) =>
+      parts.find((p) => p.type === t)?.value ?? '00';
+
+    const date = `${get('year')}-${get('month')}-${get('day')}`;
+    const minutes = Number(get('hour')) * 60 + Number(get('minute'));
+    return { date, minutes };
+  }
+
+  private timeToMinutes(timeVal: string | undefined | null): number {
+    if (!timeVal) return 0;
+    const [h, m] = String(timeVal).trim().split(':');
+    return (Number(h) || 0) * 60 + (Number(m) || 0);
   }
 
   private formatIsoDate(d: Date): string {
